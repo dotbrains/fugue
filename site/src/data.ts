@@ -6,6 +6,26 @@ export const IMAGE = 'ghcr.io/dotbrains/fugue'
 
 export type Agent = { name: string; label: string; backends: string }
 
+// Per-agent monogram badges for the icon set (distinct 2-letter mark + brand-ish
+// color). Used in the agent dropdown and the agents grid.
+export type Badge = { code: string; color: string; dark?: boolean }
+export const AGENT_BADGE: Record<string, Badge> = {
+  claude: { code: 'CL', color: '#d97757' },
+  codex: { code: 'CX', color: '#10a37f' },
+  gemini: { code: 'GE', color: '#4285f4' },
+  opencode: { code: 'OC', color: '#f0a92e', dark: true },
+  amp: { code: 'AM', color: '#ff5a4d' },
+  copilot: { code: 'CP', color: '#8a63f4' },
+  aider: { code: 'AI', color: '#0ea5b7' },
+  goose: { code: 'GO', color: '#c4823a' },
+  auggie: { code: 'AU', color: '#5b8def' },
+  pi: { code: 'PI', color: '#b15cf0' },
+  cursor: { code: 'CU', color: '#cfd3da', dark: true },
+  cline: { code: 'CN', color: '#3b82f6' },
+  kilo: { code: 'KI', color: '#f97316' },
+  droid: { code: 'DR', color: '#9aa4b2', dark: true },
+}
+
 // Egress hosts per agent (from each profile's API_HOSTS), used by the policy
 // builder to preview the docker --strict allowlist.
 export const AGENT_HOSTS: Record<string, string> = {

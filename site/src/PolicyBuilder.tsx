@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import AgentSelect from './AgentSelect'
 import {
   AGENT_HOSTS,
   AGENTS,
@@ -152,13 +153,7 @@ export default function PolicyBuilder() {
               <legend>Agent &amp; backend</legend>
               <label className="field">
                 <span>Agent</span>
-                <select value={agent} onChange={(e) => setAgent(e.target.value)}>
-                  {AGENTS.map((a) => (
-                    <option key={a.name} value={a.name}>
-                      {a.name} — {a.label}
-                    </option>
-                  ))}
-                </select>
+                <AgentSelect value={agent} onChange={setAgent} />
               </label>
               <div className="seg">
                 <button

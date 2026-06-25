@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { AgentIcon } from './AgentIcon'
 import PolicyBuilder from './PolicyBuilder'
 import {
   AGENTS,
@@ -265,7 +266,10 @@ function Agents() {
         <div className="agent-grid">
           {AGENTS.map((a) => (
             <div className="agent" key={a.name}>
-              <span className="agent-cmd">{a.name}</span>
+              <div className="agent-top">
+                <AgentIcon name={a.name} size={22} />
+                <span className="agent-cmd">{a.name}</span>
+              </div>
               <span className="agent-label">{a.label}</span>
               <span className="agent-backends">{a.backends}</span>
             </div>
