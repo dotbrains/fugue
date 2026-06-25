@@ -3,7 +3,7 @@
 [![CI](https://github.com/dotbrains/fugue/actions/workflows/ci.yml/badge.svg)](https://github.com/dotbrains/fugue/actions/workflows/ci.yml)
 [![code-scanning](https://github.com/dotbrains/fugue/actions/workflows/code-scanning.yml/badge.svg)](https://github.com/dotbrains/fugue/actions/workflows/code-scanning.yml)
 
-> Incognito mode for AI coding agents — Claude, Codex, Gemini.
+> Incognito mode for AI coding agents — Claude, Codex, Gemini, and a dozen more.
 
 A *fugue state* is dissociative amnesia: you act, then keep no memory of having
 acted. `fugue` does that to an AI agent. The agent runs, does the work, and
@@ -25,6 +25,14 @@ If the agent *tries* to write a transcript or hit an analytics endpoint under
 `--strict`, it physically can't — the firewall drops it and the filesystem
 evaporates.
 
+## Install
+
+```sh
+brew install dotbrains/tap/fugue
+# or, zero-dependency:
+curl -fsSL https://raw.githubusercontent.com/dotbrains/fugue/main/install.sh | bash
+```
+
 ## Usage
 
 ```sh
@@ -37,15 +45,34 @@ fugue --no-net-isolation claude "..."
 
 # don't even touch the host working tree — edit a throwaway copy
 fugue --ephemeral-workspace gemini "try a risky migration"
+
+# run automatically: claude/codex/... route through fugue (command claude bypasses)
+eval "$(fugue shellenv)"
 ```
 
-Credentials are read from your host env (`ANTHROPIC_API_KEY`, `OPENAI_API_KEY`,
-`GEMINI_API_KEY`/`GOOGLE_API_KEY`) and forwarded **only** to the matching agent —
-never written to disk, never shared across agents.
+Credentials are read from your host env and forwarded **only** to the matching
+agent — never written to disk, never shared across agents.
+
+## Two backends
+
+| Backend | Isolation | Notes |
+| --- | --- | --- |
+| **docker** (default) | container: tmpfs `$HOME`, nftables egress allowlist, telemetry kill-env, `--rm` | strongest guarantee; the 3 image agents |
+| **native** (macOS) | host agent under `sandbox-exec` (Seatbelt): writes leashed to the project, secret reads (SSH keys, cloud creds) kernel-denied | no Docker; runs any of the 14 agents you've installed |
+
+```sh
+fugue --backend native codex "explain this stack trace"
+```
+
+fugue supports **14 agents** — claude, codex, gemini, opencode, amp, copilot,
+aider, goose, auggie, pi, cursor, cline, kilo, droid — via per-agent profiles.
+The docker image stays minimal (the first three); the rest run through the native
+backend. See [docs/usage.md](docs/usage.md).
 
 ## How it works
 
-`bin/fugue` assembles a hardened `docker run`:
+In the default **docker backend**, `bin/fugue` assembles a hardened `docker run`
+(the native backend is described in [docs/architecture.md](docs/architecture.md)):
 
 - `--tmpfs /home/agent` — ephemeral `$HOME`; all agent state lands here and dies on exit
 - `--cap-drop ALL` + `--security-opt no-new-privileges` — minimal privilege

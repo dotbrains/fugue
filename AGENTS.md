@@ -28,16 +28,27 @@ behaving. Your changes must preserve that.
 ## Code map
 
 ```text
-bin/fugue          host launcher: parse flags, source a profile, build docker run
-src/fugue-entry    container entrypoint: nftables allowlist, scrub trap, drop privs
-profiles/*.env     per-agent: AGENT_CMD, API_KEY_VARS, API_HOSTS, TELEMETRY_ENV
-Dockerfile         node:22-slim + nftables/su-exec + agent CLIs, unprivileged user
+bin/fugue          host launcher: flags, profile, + two backends (docker run / sandbox-exec)
+src/fugue-entry    docker entrypoint: nftables allowlist, scrub trap, drop privs
+profiles/*.env     per-agent: AGENT_CMD, API_KEY_VARS, API_HOSTS, TELEMETRY_ENV, BACKENDS
+Dockerfile         node:22-slim + nftables/su-exec + the 3 image agents, unprivileged user
 package.json       pinned agent CLI versions baked into the image (Dependabot-managed)
+install.sh         zero-dep curl|bash installer
+Formula/fugue.rb   Homebrew formula (canonical copy; release copies it to the tap)
+prompts/           LLM prompt templates (e.g. generating a new agent profile)
 test/*.bats        launcher arg handling + profile-contract tests (no Docker needed)
 scripts/           helper scripts (e.g. mermaid validation)
 Makefile           the quality gate — `make check`
 docs/              user + contributor docs, ADRs, threat model, reference
 ```
+
+## Backends
+
+- **docker** (default): full container — tmpfs `$HOME`, nftables egress
+  allowlist, telemetry kill-env. Only the 3 image agents (claude/codex/gemini).
+- **native** (macOS): the host's agent under `sandbox-exec` — writes leashed to
+  the project, secret reads denied. Runs any profile marked `native`; no
+  host-level network allowlist. This is how the long tail of agents is supported.
 
 ## Security invariants — do not break these
 

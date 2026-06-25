@@ -19,6 +19,21 @@ egress allowlist, arms the scrub trap, drops privileges, and execs the agent.
 telemetry, phone-home, credentials, or caches — because the environment is made
 incapable of persisting anything, not because the agent is trusted to behave.
 
+**Backend.** How fugue sandboxes a session. The **docker backend** (default)
+uses a container; the **native backend** (macOS) uses `sandbox-exec`. Selected
+with `--backend` or `FUGUE_BACKEND`.
+
+**Native backend.** macOS-only execution that runs the host's installed agent
+under `sandbox-exec` (Seatbelt) instead of a container: writes are denied outside
+the project, and reads of a sensitive denylist (SSH keys, cloud creds) are
+blocked by the kernel. No hard network allowlist (that needs the docker backend).
+
+**Seatbelt / SBPL.** macOS's kernel sandbox and its profile language. fugue
+generates an SBPL profile and applies it with `sandbox-exec -f`.
+
+**Share-home (`--share-home`).** Native-backend flag that keeps the real `$HOME`
+(so an agent's existing host login/config works) instead of an ephemeral one.
+
 **Strict mode (`--strict`).** The default. The entrypoint installs an nftables
 egress allowlist and **fails closed** if it can't. Requires `NET_ADMIN`.
 

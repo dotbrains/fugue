@@ -6,24 +6,50 @@ if you intend to run the quality gate.
 
 ## Runtime requirements
 
+Requirements depend on the backend (see [usage.md](usage.md#backends)):
+
 | Requirement | Why                                                      |
 | ----------- | -------------------------------------------------------- |
-| Docker      | fugue runs every session as a `docker run --rm` container |
 | Bash 4+     | the launcher uses arrays and `${!var}` indirection      |
-| `NET_ADMIN` capability | only for `--strict` (the default) — the entrypoint installs an nftables egress allowlist |
+| Docker      | **docker backend** — every session is a `docker run --rm` container |
+| `NET_ADMIN` capability | docker `--strict` (the default) — the entrypoint installs an nftables egress allowlist |
+| macOS + `sandbox-exec` | **native backend** — kernel sandboxing (built into macOS) |
+| the agent's CLI installed on the host | native backend runs your host's copy of the agent |
 
-`--strict` needs the container to hold `NET_ADMIN`. On hosts that forbid it,
-run with `--no-net-isolation` (telemetry env still applies, but there is no
-hard network leash). See [security.md](security.md) for the trade-off.
+docker `--strict` needs the container to hold `NET_ADMIN`. On hosts that forbid
+it, run with `--no-net-isolation` (telemetry env still applies, but there is no
+hard network leash), or use the native backend. See [security.md](security.md).
 
 ## Install the launcher
 
-Clone the repository and put `bin/` on your `PATH`:
+### Homebrew
+
+```sh
+brew install dotbrains/tap/fugue
+```
+
+### Install script (zero-dependency)
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/dotbrains/fugue/main/install.sh | bash
+```
+
+It installs the tree under `~/.local/share/fugue` and links `fugue` into
+`~/.local/bin` (override with `FUGUE_PREFIX`). Make sure that bin dir is on your
+`PATH`.
+
+### From a clone
 
 ```sh
 git clone https://github.com/dotbrains/fugue.git
 cd fugue
 export PATH="$PWD/bin:$PATH"   # add to your shell profile to persist
+```
+
+To route agents through fugue automatically, add the shell wrappers:
+
+```sh
+eval "$(fugue shellenv)"        # bash/zsh; fish: fugue shellenv fish | source
 ```
 
 ## Get the image

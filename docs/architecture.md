@@ -1,9 +1,19 @@
 # Architecture
 
-fugue is two scripts and an image. `bin/fugue` runs on the host and assembles a
-hardened `docker run`; `src/fugue-entry` runs inside the container, installs the
-egress allowlist, drops privileges, and execs the agent. The
-[`Dockerfile`](../Dockerfile) builds the minimal runtime they need.
+`bin/fugue` runs on the host, parses flags, resolves the agent profile, forwards
+one credential, and then hands off to one of two **backends**:
+
+- **docker** (default) — assembles a hardened `docker run`; `src/fugue-entry`
+  runs inside the container, installs the egress allowlist, drops privileges, and
+  execs the agent. The [`Dockerfile`](../Dockerfile) builds the minimal image.
+- **native** (macOS) — generates a Seatbelt (SBPL) profile and execs the host's
+  agent under `sandbox-exec`. No container; the kernel enforces the file-system
+  boundary.
+
+Both share the profile system and the telemetry kill-env; they differ in *how*
+they sandbox.
+
+## docker backend
 
 ```mermaid
 sequenceDiagram
@@ -26,6 +36,43 @@ sequenceDiagram
     E-->>L: return rc
     L-->>U: exit rc (nothing persists)
 ```
+
+## native backend (macOS sandbox-exec)
+
+The native backend runs the agent the host already has installed, but under a
+kernel sandbox — closest to safehouse-style on-host sandboxing, with fugue's
+no-trace defaults layered on.
+
+```mermaid
+flowchart TD
+    P[bin/fugue native] --> H["ephemeral $HOME = mktemp -d<br/>(or real $HOME with --share-home)"]
+    P --> SB[generate SBPL profile]
+    SB --> R1["allow read default<br/>deny read: ~/.ssh ~/.aws ~/.gnupg<br/>keychains, gh/gcloud/kube creds, .netrc"]
+    SB --> R2["deny write default<br/>allow write: project, ephemeral HOME,<br/>temp, --add-dir paths"]
+    H --> X["env -i + telemetry kill-env + one credential"]
+    SB --> X
+    X --> S["sandbox-exec -f profile AGENT args"]
+    S --> C["on exit: shred temp tree (scrub)"]
+```
+
+What it provides vs. the docker backend:
+
+- **File system**: writes are denied outside the project / scratch areas, and
+  reads of a sensitive denylist (SSH keys, cloud creds, keychains) are blocked by
+  the kernel. Toolchain reads still work (read is allow-by-default minus the
+  denylist).
+- **`$HOME`**: ephemeral by default (shredded on exit); `--share-home` keeps the
+  real one for agents that need an existing login.
+- **Environment**: started from a clean `env -i` plus a small safe passthrough,
+  the telemetry kill-env, and the single credential — so other host secrets in
+  your environment don't leak to the agent.
+- **Network**: *not* host-allowlisted. sandbox-exec can't pin egress to specific
+  hosts the way nftables does, so native trades the network leash for
+  zero-dependency on-host execution. Use the docker backend when you need the
+  hard egress allowlist.
+
+Extra read denials can be added via `FUGUE_DENY_READ` (space-separated absolute
+subpaths).
 
 ## The launcher: `bin/fugue`
 
