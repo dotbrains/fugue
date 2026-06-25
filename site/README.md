@@ -1,3 +1,5 @@
+<img src="public/favicon.svg" alt="fugue logo" width="72" height="72" />
+
 # fugue site
 
 The marketing site for [fugue](https://github.com/dotbrains/fugue) — a single-page

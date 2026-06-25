@@ -12,10 +12,20 @@ config:
   # Tables are hand-edited; requiring the pipes to be visually column-aligned is
   # a maintenance tax with no reader benefit (GitHub renders them either way).
   MD060: false
+  # Allow the <img> logo at the top of READMEs (markdown has no width control).
+  MD033:
+    allowed_elements:
+      - img
+  # READMEs lead with a logo image, not a heading.
+  MD041: false
 
 globs:
   - "**/*.md"
 
+# Honor .gitignore so vendored markdown (node_modules, dist) is never linted,
+# at any depth.
+gitignore: true
+
 ignores:
-  - node_modules
-  - .git
+  - "**/node_modules/**"
+  - ".git/**"

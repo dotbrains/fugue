@@ -1,3 +1,5 @@
+<img src="site/public/favicon.svg" alt="fugue logo" width="72" height="72" />
+
 # fugue
 
 [![CI](https://github.com/dotbrains/fugue/actions/workflows/ci.yml/badge.svg)](https://github.com/dotbrains/fugue/actions/workflows/ci.yml)
