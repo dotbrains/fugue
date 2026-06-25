@@ -76,26 +76,30 @@ export default function DiceDemo() {
                 <span className="dot dot-g" />
                 <span className="term-title">~/project</span>
               </div>
-              <pre className="term-body chat">
-                <span className="ln">
-                  <span className="who is-you">YOU</span> {s.ask}
-                </span>
-                <span className="ln">
-                  <span className="who is-agent">AGENT</span>{' '}
-                  <span className="think">thinking…</span>
-                </span>
-                <span className="ln cmd">
-                  {'    '}$ {s.cmd}
-                </span>
-                <span className="ln">
-                  <span className="who is-you">YOU</span> !@#$ I said{' '}
-                  <em>be careful</em>.
-                </span>
-                <span className="ln">
-                  <span className="who is-agent">AGENT</span> You’re absolutely
-                  right! 🤡
-                </span>
-              </pre>
+              <div className="term-body chat">
+                <div className="crow">
+                  <span className="who is-you">YOU</span>
+                  <span className="msg">{s.ask}</span>
+                </div>
+                <div className="crow">
+                  <span className="who is-agent">AGENT</span>
+                  <span className="msg think">thinking…</span>
+                </div>
+                <div className="crow">
+                  <span className="who" />
+                  <span className="msg cmd">$ {s.cmd}</span>
+                </div>
+                <div className="crow">
+                  <span className="who is-you">YOU</span>
+                  <span className="msg">
+                    !@#$ I said <em>be careful</em>.
+                  </span>
+                </div>
+                <div className="crow">
+                  <span className="who is-agent">AGENT</span>
+                  <span className="msg dim">You’re absolutely right! 🤡</span>
+                </div>
+              </div>
             </div>
             <button
               type="button"
