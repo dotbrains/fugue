@@ -286,11 +286,13 @@ function Config() {
     <section className="section alt">
       <div className="container">
         <h2>Configure to taste</h2>
-        <div className="cards three">
+        <div className="cards config-cards">
           {CONFIG.map((c) => (
             <div className="card config" key={c.title}>
-              <h3>{c.title}</h3>
-              <p>{c.body}</p>
+              <div className="config-head">
+                <h3>{c.title}</h3>
+                <p>{c.body}</p>
+              </div>
               {c.code ? (
                 <pre className="mini">
                   <code>{c.code}</code>
@@ -309,12 +311,14 @@ function Install() {
     <section className="section" id="install">
       <div className="container">
         <h2>Install</h2>
-        <div className="cards three">
+        <div className="cards install-cards">
           {INSTALL.map((i) => (
             <div className="card install" key={i.id}>
-              <h3>{i.label}</h3>
+              <div className="install-head">
+                <h3>{i.label}</h3>
+                <p className="muted">{i.note}</p>
+              </div>
               <Code>{i.code}</Code>
-              <p className="muted">{i.note}</p>
             </div>
           ))}
         </div>
