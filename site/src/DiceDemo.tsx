@@ -78,21 +78,21 @@ export default function DiceDemo() {
               </div>
               <pre className="term-body chat">
                 <span className="ln">
-                  <span className="who you">YOU</span> {s.ask}
+                  <span className="who is-you">YOU</span> {s.ask}
                 </span>
                 <span className="ln">
-                  <span className="who agent">AGENT</span>{' '}
+                  <span className="who is-agent">AGENT</span>{' '}
                   <span className="think">thinking…</span>
                 </span>
                 <span className="ln cmd">
                   {'    '}$ {s.cmd}
                 </span>
                 <span className="ln">
-                  <span className="who you">YOU</span> !@#$ I said{' '}
+                  <span className="who is-you">YOU</span> !@#$ I said{' '}
                   <em>be careful</em>.
                 </span>
                 <span className="ln">
-                  <span className="who agent">AGENT</span> You’re absolutely
+                  <span className="who is-agent">AGENT</span> You’re absolutely
                   right! 🤡
                 </span>
               </pre>

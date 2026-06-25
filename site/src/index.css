@@ -589,10 +589,10 @@ h3 {
   white-space: nowrap;
   vertical-align: 1px;
 }
-.chat .who.you {
+.chat .who.is-you {
   color: var(--accent);
 }
-.chat .who.agent {
+.chat .who.is-agent {
   color: var(--red);
 }
 .chat .think {
