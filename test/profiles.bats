@@ -20,6 +20,7 @@ profile_fields() {
     printf '%s\n' "${API_KEY_VARS:-}"
     printf '%s\n' "${API_HOSTS:-}"
     printf '%s\n' "${#TELEMETRY_ENV[@]}"
+    printf '%s\n' "${BACKENDS:-}"
   )
 }
 
@@ -32,11 +33,25 @@ profile_fields() {
   for profile in "$PROFILES_DIR"/*.env; do
     run profile_fields "$profile"
     [ "$status" -eq 0 ]
-    # output lines: 1=AGENT_CMD 2=API_KEY_VARS 3=API_HOSTS 4=#TELEMETRY_ENV
+    # lines: 1=AGENT_CMD 2=API_KEY_VARS 3=API_HOSTS 4=#TELEMETRY_ENV 5=BACKENDS
     [ -n "${lines[0]}" ] || { echo "AGENT_CMD empty in $profile"; false; }
     [ -n "${lines[1]}" ] || { echo "API_KEY_VARS empty in $profile"; false; }
     [ -n "${lines[2]}" ] || { echo "API_HOSTS empty in $profile"; false; }
     [ "${lines[3]}" -gt 0 ] || { echo "TELEMETRY_ENV empty in $profile"; false; }
+    [ -n "${lines[4]}" ] || { echo "BACKENDS empty in $profile"; false; }
+  done
+}
+
+@test "every profile declares only known backends" {
+  for profile in "$PROFILES_DIR"/*.env; do
+    run profile_fields "$profile"
+    [ "$status" -eq 0 ]
+    for backend in ${lines[4]}; do
+      case "$backend" in
+        docker | native) ;;
+        *) echo "unknown backend '$backend' in $profile"; false ;;
+      esac
+    done
   done
 }
 
