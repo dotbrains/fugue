@@ -39,6 +39,8 @@ EOF
 teardown() {
   [[ -n "${TMP:-}" ]] && rm -rf "$TMP"
   [[ -n "${ESCAPE:-}" ]] && rm -f "$ESCAPE"
+  # Skipped tests (non-macOS) never set the vars above; never fail teardown.
+  return 0
 }
 
 # Run the stub agent through fugue's native backend from the project dir.
