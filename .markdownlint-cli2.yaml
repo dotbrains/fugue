@@ -1,0 +1,21 @@
+# markdownlint-cli2 configuration for fugue's docs.
+config:
+  default: true
+  # Prose is wrapped by hand, but tables, URLs, and command lines routinely
+  # run past any fixed width — line length is not a useful gate here.
+  MD013: false
+  # Allow duplicate headings under different parents (e.g. the repeated
+  # Context/Decision/Consequences sections across ADRs are in separate files,
+  # but this keeps siblings-only semantics if they ever share one).
+  MD024:
+    siblings_only: true
+  # Tables are hand-edited; requiring the pipes to be visually column-aligned is
+  # a maintenance tax with no reader benefit (GitHub renders them either way).
+  MD060: false
+
+globs:
+  - "**/*.md"
+
+ignores:
+  - node_modules
+  - .git

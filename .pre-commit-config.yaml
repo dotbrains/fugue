@@ -1,0 +1,77 @@
+# Pre-commit hooks that mirror the CI quality gate. Every hook runs the same
+# `make` target CI runs, so local checks and CI never drift. The tools must be
+# on your PATH — see docs/installation.md.
+#
+# Install once (sets up both the commit and push hooks):
+#   pre-commit install
+#
+# The fast gates run on `git commit`; the slower image build runs on `git push`.
+minimum_pre_commit_version: "3.2.0"
+
+default_install_hook_types: [pre-commit, pre-push]
+
+repos:
+  - repo: local
+    hooks:
+      - id: shfmt
+        name: shfmt (format)
+        entry: make check:format
+        language: system
+        pass_filenames: false
+        files: '^(bin/fugue|src/fugue-entry|scripts/.*\.sh|profiles/.*\.env)$'
+
+      - id: shellcheck
+        name: shellcheck
+        entry: make check:lint
+        language: system
+        pass_filenames: false
+        files: '^(bin/fugue|src/fugue-entry|scripts/.*\.sh|profiles/.*\.env)$'
+
+      - id: hadolint
+        name: hadolint
+        entry: make check:dockerfile
+        language: system
+        pass_filenames: false
+        files: '^Dockerfile$'
+
+      - id: bats
+        name: bats tests
+        entry: make check:tests
+        language: system
+        pass_filenames: false
+        files: '^(bin/fugue|profiles/.*\.env|test/.*\.bats)$'
+
+      - id: markdownlint
+        name: markdownlint
+        entry: make check:markdown
+        language: system
+        pass_filenames: false
+        files: '\.md$'
+
+      - id: mermaid
+        name: mermaid diagrams
+        entry: make check:mermaid
+        language: system
+        pass_filenames: false
+        files: '\.md$'
+
+      - id: actionlint
+        name: actionlint
+        entry: make check:actions
+        language: system
+        pass_filenames: false
+        files: '^\.github/(workflows/.*|actionlint)\.ya?ml$'
+
+      - id: gitleaks
+        name: gitleaks
+        entry: make check:secrets
+        language: system
+        pass_filenames: false
+
+      - id: image-build
+        name: image build
+        entry: make check:build
+        language: system
+        pass_filenames: false
+        stages: [pre-push]
+        files: '^(Dockerfile|bin/fugue|src/fugue-entry|profiles/.*\.env)$'
