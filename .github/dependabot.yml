@@ -1,0 +1,34 @@
+version: 2
+
+updates:
+  # Agent CLIs baked into the image — pinned in package.json / package-lock.json.
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: chore
+    groups:
+      agent-clis:
+        patterns:
+          - "*"
+
+  # The Dockerfile base image (the digest-pinned FROM line).
+  - package-ecosystem: docker
+    directory: "/"
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: chore
+
+  # Versions of the actions used in the CI, code-scanning, and release workflows.
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: ci
+    groups:
+      actions:
+        patterns:
+          - "*"
