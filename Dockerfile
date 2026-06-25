@@ -6,7 +6,7 @@
 #
 # Versions are pinned for reproducible release images. Bump them intentionally
 # (and rebuild) — see docs/releasing.md.
-FROM node:22-bookworm-slim@sha256:813a7480f28fdadac1f7f5c824bcdad435b5bc1322a5968bbbdef8d058f9dff4
+FROM node:26-bookworm-slim@sha256:9898bb74f4ee319780e87819df703b3633113bc3422f151fd11155cf974a2749
 
 # The agent CLI versions are pinned in package.json / package-lock.json (so
 # Dependabot can bump them); su-exec is built from a pinned source tag.
