@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { AgentIcon } from './AgentIcon'
+import DiceDemo from './DiceDemo'
 import PolicyBuilder from './PolicyBuilder'
 import {
   AGENTS,
@@ -387,6 +388,7 @@ export default function App() {
       <Nav />
       <main>
         <Hero />
+        <DiceDemo />
         <Trace />
         <Backends />
         <Grants />

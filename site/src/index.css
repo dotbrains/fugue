@@ -484,18 +484,23 @@ h3 {
   font-size: 0.98rem;
 }
 
-/* agent monogram icon */
+/* agent icon tile (real logo, or a monogram fallback) */
 .aicon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 5px;
-  font-family: var(--mono);
-  font-weight: 700;
-  letter-spacing: -0.03em;
+  border-radius: 6px;
+  background: #15181d;
+  border: 1px solid var(--border);
   flex: none;
   line-height: 1;
   user-select: none;
+}
+.aicon-code {
+  font-family: var(--mono);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1;
 }
 .agent-label {
   color: var(--text);
@@ -554,6 +559,86 @@ h3 {
   padding: 0;
   color: inherit;
   font-size: inherit;
+}
+
+/* ---------- dice demo ---------- */
+.dice-title {
+  font-size: clamp(1.5rem, 3vw, 2.05rem);
+  max-width: 24ch;
+  margin: 0 0 28px;
+}
+.dice {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 40px;
+  align-items: center;
+}
+.dice-left {
+  min-width: 0;
+}
+.term-body.chat {
+  font-size: 0.86rem;
+  line-height: 1.9;
+}
+.chat .who {
+  display: inline-block;
+  width: 52px;
+  font-weight: 700;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  vertical-align: 1px;
+}
+.chat .who.you {
+  color: var(--accent);
+}
+.chat .who.agent {
+  color: var(--red);
+}
+.chat .think {
+  color: var(--faint);
+  font-style: italic;
+}
+.chat .cmd {
+  color: var(--red);
+  display: block;
+}
+.roll {
+  margin-top: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--mono);
+  font-size: 0.9rem;
+  color: var(--text);
+  background: var(--panel);
+  border: 1px solid var(--border-2);
+  border-radius: 10px;
+  padding: 0.7rem 1.1rem;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+.roll:hover {
+  border-color: var(--accent);
+}
+.roll-die {
+  color: var(--accent);
+  font-size: 1.2rem;
+}
+.dice-right h3 {
+  font-size: 1.35rem;
+  margin: 0 0 14px;
+}
+.deny-chip {
+  font-family: var(--mono);
+  font-size: 0.84rem;
+  color: var(--green);
+  background: color-mix(in srgb, var(--green) 9%, var(--bg));
+  border: 1px solid color-mix(in srgb, var(--green) 30%, var(--border));
+  border-radius: 10px;
+  padding: 0.8rem 1rem;
+  overflow-x: auto;
+  white-space: nowrap;
 }
 
 /* ---------- policy builder ---------- */
@@ -822,6 +907,10 @@ h3 {
   }
   .builder-out {
     position: static;
+  }
+  .dice {
+    grid-template-columns: 1fr;
+    gap: 24px;
   }
   .trace-head {
     display: none;
