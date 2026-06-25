@@ -188,8 +188,10 @@ for var in ${API_KEY_VARS:-}; do
   [[ -n "${!var:-}" ]] && CRED_VARS+=("$var")
 done
 
-# Resolve a host path to an absolute, real path (no trailing slash surprises).
-abspath() { (cd "$1" 2>/dev/null && pwd) || die "no such directory: $1"; }
+# Resolve a directory to its absolute, *physical* path. `pwd -P` matters on
+# macOS, where /var, /tmp, /etc are symlinks to /private/... and the Seatbelt
+# sandbox matches the canonical (resolved) path, not the symlinked one.
+abspath() { (cd "$1" 2>/dev/null && pwd -P) || die "no such directory: $1"; }
 
 # Shred the native backend's temp tree (ephemeral $HOME, workspace copy, and the
 # generated profile). Invoked indirectly via `trap ... EXIT` in run_native, so
@@ -290,25 +292,27 @@ run_native() {
     die "no API key in env for $AGENT (expected one of: ${API_KEY_VARS:-?}); or pass --share-home to use your host login"
   fi
 
-  local real_home="$HOME" workdir run_home tmproot profile
+  local real_home workdir run_home tmproot profile
+  real_home="$(abspath "$HOME")"
   tmproot="$(mktemp -d "${TMPDIR:-/tmp}/fugue.XXXXXX")"
   NATIVE_TMP="$tmproot" # visible to the EXIT trap after this function returns
 
-  # workspace: the cwd, or a throwaway copy of it under --ephemeral-workspace
+  # workspace: the cwd, or a throwaway copy of it under --ephemeral-workspace.
+  # Canonicalize so the SBPL allow-rule matches the sandbox's resolved path.
   if [[ "$EPHEMERAL_WS" -eq 1 ]]; then
-    workdir="$tmproot/workspace"
-    mkdir -p "$workdir"
-    cp -R "$(pwd)/." "$workdir/" 2>/dev/null || true
+    mkdir -p "$tmproot/workspace"
+    cp -R "$(pwd)/." "$tmproot/workspace/" 2>/dev/null || true
+    workdir="$(abspath "$tmproot/workspace")"
   else
-    workdir="$(pwd)"
+    workdir="$(pwd -P)"
   fi
 
   # $HOME: ephemeral by default (no-trace); the real home only with --share-home
   if [[ "$SHARE_HOME" -eq 1 ]]; then
     run_home="$real_home"
   else
-    run_home="$tmproot/home"
-    mkdir -p "$run_home"
+    mkdir -p "$tmproot/home"
+    run_home="$(abspath "$tmproot/home")"
   fi
 
   profile="$tmproot/fugue.sb"
@@ -383,9 +387,11 @@ SB
 (deny file-read* (literal "$real_home/.pypirc"))
 SB
 
-  # caller-supplied extra read denials (space-separated absolute subpaths)
+  # caller-supplied extra read denials (space-separated absolute subpaths),
+  # canonicalized so they match the sandbox's resolved view of the path.
   for d in ${FUGUE_DENY_READ:-}; do
-    printf '(deny file-read* (subpath "%s"))\n' "$d"
+    real="$(cd "$d" 2>/dev/null && pwd -P || echo "$d")"
+    printf '(deny file-read* (subpath "%s"))\n' "$real"
   done
 
   # read-only extra dirs are readable by the broad allow above; nothing to add.
