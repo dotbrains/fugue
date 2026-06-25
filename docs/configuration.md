@@ -39,12 +39,17 @@ launcher that sources the file, not within the file itself.
 ### Adding an agent
 
 1. Create `profiles/<name>.env` with the four fields above.
-2. Add the agent's CLI to the [`Dockerfile`](../Dockerfile) `npm install -g`
-   (or equivalent) line.
+2. Add the agent's CLI to [`package.json`](../package.json) `dependencies` (at a
+   pinned version) and regenerate the lockfile:
+
+   ```sh
+   npm install --package-lock-only --omit=dev
+   ```
+
 3. Rebuild the image (`make check:build`).
-4. Add a row to the agent tables in [usage.md](usage.md), and extend the test
-   data in [`test/profiles.bats`](../test/profiles.bats) if needed (the
-   contract test already covers every `profiles/*.env`).
+4. Add a row to the agent tables in [usage.md](usage.md). The contract test
+   already covers every `profiles/*.env`, so no test change is needed for a
+   standard agent.
 
 ## Environment variables
 

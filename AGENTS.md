@@ -32,6 +32,7 @@ bin/fugue          host launcher: parse flags, source a profile, build docker ru
 src/fugue-entry    container entrypoint: nftables allowlist, scrub trap, drop privs
 profiles/*.env     per-agent: AGENT_CMD, API_KEY_VARS, API_HOSTS, TELEMETRY_ENV
 Dockerfile         node:22-slim + nftables/su-exec + agent CLIs, unprivileged user
+package.json       pinned agent CLI versions baked into the image (Dependabot-managed)
 test/*.bats        launcher arg handling + profile-contract tests (no Docker needed)
 scripts/           helper scripts (e.g. mermaid validation)
 Makefile           the quality gate — `make check`
@@ -101,7 +102,8 @@ each gate is wired. CI runs the same targets, so green locally means green in CI
 
 1. Create `profiles/<name>.env` with `AGENT_CMD`, `API_KEY_VARS`, `API_HOSTS`,
    and `TELEMETRY_ENV` (see [configuration.md](docs/configuration.md)).
-2. Add the CLI to the `Dockerfile`.
+2. Add the CLI to `package.json` (pinned) and regenerate the lockfile with
+   `npm install --package-lock-only --omit=dev`.
 3. `make check:build`, then `make check` — the profile-contract test covers the
    new profile automatically.
 

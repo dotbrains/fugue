@@ -61,14 +61,20 @@ make check:format SHFMT=/path/to/shfmt
 
 ## CI
 
-Two workflows mirror the local gate:
+Three workflows mirror the local gate and ship the image:
 
 - [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) — a `shell` job
-  (format, lint, dockerfile, tests) and an `image build` job.
+  (format, lint, dockerfile, tests), a `docs` job (markdown, mermaid), and an
+  `image build` job.
 - [`.github/workflows/code-scanning.yml`](../.github/workflows/code-scanning.yml)
   — `actionlint` and `gitleaks`, plus a weekly schedule.
+- [`.github/workflows/release.yml`](../.github/workflows/release.yml) — builds
+  and publishes the multi-arch image to GHCR on a `v*` tag. See
+  [releasing.md](releasing.md).
 
-Both run on the org's self-hosted Blacksmith runners.
+All run on the org's self-hosted Blacksmith runners. Pinned versions (agent
+CLIs, base image, action versions) are kept current by
+[Dependabot](../.github/dependabot.yml).
 
 ## Adding an agent
 

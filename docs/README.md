@@ -22,6 +22,8 @@ These docs are for people running fugue and people changing it. Start here:
   contract, with the full [threat model](threat-model.md).
 - [development.md](development.md): contributor workflow, the quality gate, and
   code organization.
+- [releasing.md](releasing.md): how the image is published to GHCR on a version
+  tag, and how pinned versions are kept current with Dependabot.
 - [troubleshooting.md](troubleshooting.md): common local and runtime failures.
 - [glossary.md](glossary.md): project terms used across code and docs.
 - [adr/](adr/): the architectural decisions behind fugue's design.
