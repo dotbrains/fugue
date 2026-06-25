@@ -13,13 +13,18 @@ updates:
         patterns:
           - "*"
 
-  # The Dockerfile base image (the digest-pinned FROM line).
+  # The Dockerfile base image (the digest-pinned FROM line). Stay on the chosen
+  # Node LTS major (22): take patch/minor and digest bumps, but a new major is a
+  # deliberate, tested migration — not an automatic PR.
   - package-ecosystem: docker
     directory: "/"
     schedule:
       interval: weekly
     commit-message:
       prefix: chore
+    ignore:
+      - dependency-name: "node"
+        update-types: ["version-update:semver-major"]
 
   # Versions of the actions used in the CI, code-scanning, and release workflows.
   - package-ecosystem: github-actions
