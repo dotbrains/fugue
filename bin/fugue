@@ -1,0 +1,137 @@
+#!/usr/bin/env bash
+#
+# fugue — run an AI coding agent in a no-trace session.
+#
+# A fugue state is dissociative amnesia: you act, then retain no memory of it.
+# That is exactly what this does to Claude / Codex / Gemini — the agent runs,
+# does the work, and leaves nothing behind: no transcript, no telemetry, no
+# phone-home, no lingering credentials or caches.
+#
+# The guarantee does not depend on the agent behaving. The *environment* is made
+# incapable of persisting anything:
+#   - $HOME lives on tmpfs and is destroyed on exit
+#   - per-agent telemetry / analytics / autoupdate env is killed
+#   - egress is firewalled to the model API host only (--strict)
+#   - the whole container is --rm; nothing survives teardown
+#
+# Usage:
+#   fugue <agent> [args...]        # claude | codex | gemini
+#   fugue claude "refactor src/"
+#   fugue --strict codex "explain this stack trace"
+#   fugue --ephemeral-workspace gemini "scan for secrets"
+#
+# Flags:
+#   --strict                 hard egress allowlist (default; needs NET_ADMIN)
+#   --no-net-isolation       env-only mode, no firewall (weaker, portable)
+#   --ephemeral-workspace    copy cwd into a throwaway layer; edits don't touch host
+#   --keep-on-error          do not auto-teardown if the agent exits non-zero (debug)
+#   --image <ref>            override the container image (default: ghcr.io/dotbrains/fugue)
+#   -h, --help               this help
+#
+set -euo pipefail
+
+FUGUE_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+IMAGE="${FUGUE_IMAGE:-ghcr.io/dotbrains/fugue:latest}"
+STRICT=1
+EPHEMERAL_WS=0
+KEEP_ON_ERROR=0
+
+die() { printf 'fugue: %s\n' "$*" >&2; exit 2; }
+
+usage() { sed -n '2,40p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; exit 0; }
+
+# --- parse flags (stop at the agent name) -----------------------------------
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --strict)              STRICT=1; shift ;;
+    --no-net-isolation)    STRICT=0; shift ;;
+    --ephemeral-workspace) EPHEMERAL_WS=1; shift ;;
+    --keep-on-error)       KEEP_ON_ERROR=1; shift ;;
+    --image)               IMAGE="${2:?--image needs a value}"; shift 2 ;;
+    -h|--help)             usage ;;
+    --) shift; break ;;
+    -*) die "unknown flag: $1" ;;
+    *)  break ;;
+  esac
+done
+
+AGENT="${1:-}"
+[[ -n "$AGENT" ]] || die "no agent given. try: fugue claude \"...\"  (see --help)"
+shift || true
+
+PROFILE="$FUGUE_ROOT/profiles/$AGENT.env"
+[[ -f "$PROFILE" ]] || die "unknown agent '$AGENT' (no profile at $PROFILE). known: $(cd "$FUGUE_ROOT/profiles" && ls *.env | sed 's/\.env$//' | tr '\n' ' ')"
+
+command -v docker >/dev/null || die "docker not found on PATH"
+
+# --- load the agent profile --------------------------------------------------
+# Profiles export: AGENT_CMD, API_HOSTS (space-sep), and TELEMETRY_ENV (array).
+# shellcheck source=/dev/null
+source "$PROFILE"
+
+# Forward exactly the one credential this agent needs, nothing else.
+declare -a CRED_ENV=()
+for var in ${API_KEY_VARS:-}; do
+  if [[ -n "${!var:-}" ]]; then
+    CRED_ENV+=( -e "$var" )
+  fi
+done
+[[ ${#CRED_ENV[@]} -gt 0 ]] || die "no API key in env for $AGENT (expected one of: ${API_KEY_VARS:-?})"
+
+# --- assemble docker run -----------------------------------------------------
+declare -a DOCKER_ARGS=(
+  run --rm -it
+  --hostname fugue
+  # ephemeral $HOME — every agent writes its state/history/transcripts here
+  --tmpfs /home/agent:rw,exec,uid=1001,gid=1001,mode=0700
+  # no new privileges; drop the lot, add back only what egress needs
+  --security-opt no-new-privileges
+  --cap-drop ALL
+  # kill the managed-sandbox trace surfaces if the base image carries them
+  -e FUGUE=1
+  -e HOME=/home/agent
+  -e DISABLE_AUTOUPDATER=1
+  -e DO_NOT_TRACK=1
+)
+
+# per-agent telemetry / analytics kill switches (from profile)
+for kv in "${TELEMETRY_ENV[@]}"; do
+  DOCKER_ARGS+=( -e "$kv" )
+done
+
+DOCKER_ARGS+=( "${CRED_ENV[@]}" )
+
+# workspace mount
+if [[ "$EPHEMERAL_WS" -eq 1 ]]; then
+  # copy-on-tmpfs: agent edits a throwaway copy, host cwd is never touched
+  DOCKER_ARGS+=( --tmpfs /workspace:rw,exec,mode=0777 -e FUGUE_EPHEMERAL_WS=1 )
+  HOST_CWD="$(pwd)"
+else
+  DOCKER_ARGS+=( -v "$(pwd):/workspace:rw" )
+  HOST_CWD=""
+fi
+DOCKER_ARGS+=( -w /workspace )
+
+# egress isolation
+if [[ "$STRICT" -eq 1 ]]; then
+  # NET_ADMIN lets the entrypoint install an nftables allowlist for API_HOSTS.
+  DOCKER_ARGS+=( --cap-add NET_ADMIN -e "FUGUE_ALLOW_HOSTS=$API_HOSTS" -e FUGUE_STRICT=1 )
+else
+  DOCKER_ARGS+=( -e FUGUE_STRICT=0 )
+fi
+
+[[ "$KEEP_ON_ERROR" -eq 1 ]] && DOCKER_ARGS+=( -e FUGUE_KEEP_ON_ERROR=1 )
+
+# --- run ---------------------------------------------------------------------
+printf 'fugue: %s session — strict=%s ephemeral-ws=%s — no trace will persist\n' \
+  "$AGENT" "$STRICT" "$EPHEMERAL_WS" >&2
+
+set +e
+docker "${DOCKER_ARGS[@]}" "$IMAGE" \
+  /usr/local/bin/fugue-entry "$AGENT_CMD" "$HOST_CWD" "$@"
+rc=$?
+set -e
+
+# Container was --rm: tmpfs $HOME and any overlay are already gone. Nothing to
+# scrub on the host unless an ephemeral-workspace copy-out was requested.
+exit "$rc"

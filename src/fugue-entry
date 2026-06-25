@@ -1,0 +1,82 @@
+#!/usr/bin/env bash
+#
+# fugue-entry — container-side entrypoint. Installs the egress allowlist,
+# wires the scrub trap, then execs the agent. Runs as root briefly to set up
+# nftables (NET_ADMIN), then drops to the unprivileged `agent` user.
+#
+#   argv: <agent_cmd> <host_cwd> [agent args...]
+#
+set -euo pipefail
+
+AGENT_CMD="${1:?fugue-entry: missing agent command}"; shift
+HOST_CWD="${1:-}"; shift || true   # reserved for ephemeral copy-out, unused inside
+
+log() { printf 'fugue-entry: %s\n' "$*" >&2; }
+
+# --- egress allowlist --------------------------------------------------------
+# Deny all outbound except DNS, loopback, established/related, and the resolved
+# IPs of FUGUE_ALLOW_HOSTS. If nft is unavailable or we lack NET_ADMIN, fail
+# closed in strict mode — an incognito promise we can't keep is worse than none.
+install_egress_allowlist() {
+  local host ip
+  if ! command -v nft >/dev/null; then
+    log "FATAL: nft not present but FUGUE_STRICT=1; refusing to run unguarded"
+    exit 3
+  fi
+
+  nft -f - <<'NFT'
+table inet fugue {
+  chain output {
+    type filter hook output priority 0; policy drop;
+    oif "lo" accept
+    ct state established,related accept
+    udp dport 53 accept
+    tcp dport 53 accept
+  }
+}
+NFT
+
+  for host in $FUGUE_ALLOW_HOSTS; do
+    # Resolve at startup; pin every A/AAAA record into the allowlist.
+    while read -r ip; do
+      [[ -n "$ip" ]] || continue
+      if [[ "$ip" == *:* ]]; then
+        nft add rule inet fugue output ip6 daddr "$ip" tcp dport 443 accept
+      else
+        nft add rule inet fugue output ip daddr "$ip" tcp dport 443 accept
+      fi
+      log "egress allow: $host -> $ip:443"
+    done < <(getent ahosts "$host" | awk '{print $1}' | sort -u)
+  done
+}
+
+if [[ "${FUGUE_STRICT:-0}" == "1" ]]; then
+  install_egress_allowlist
+else
+  log "net isolation OFF (--no-net-isolation): relying on telemetry env only"
+fi
+
+# --- scrub trap --------------------------------------------------------------
+# Belt-and-suspenders: the container is --rm so tmpfs $HOME vanishes anyway,
+# but we proactively shred anything an agent may have dropped outside $HOME.
+scrub() {
+  local rc=$?
+  if [[ "${FUGUE_KEEP_ON_ERROR:-0}" == "1" && "$rc" -ne 0 ]]; then
+    log "agent exited $rc; --keep-on-error set, skipping scrub (container still --rm)"
+    return
+  fi
+  # Common stray-state locations outside the tmpfs HOME.
+  rm -rf /tmp/* /var/tmp/* 2>/dev/null || true
+  find / -xdev \( -name '*.log' -o -name '.bash_history' \) -delete 2>/dev/null || true
+  log "scrub complete"
+}
+trap scrub EXIT
+
+# --- drop privileges and run the agent --------------------------------------
+# We came in as root only for nft. The agent must never run privileged.
+log "starting agent: $AGENT_CMD ($*)"
+if command -v su-exec >/dev/null; then
+  exec su-exec agent:agent "$AGENT_CMD" "$@"
+else
+  exec setpriv --reuid=1001 --regid=1001 --clear-groups "$AGENT_CMD" "$@"
+fi
