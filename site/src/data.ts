@@ -152,21 +152,29 @@ export const GRANTS = {
   ],
 }
 
-export type ConfigItem = { title: string; body: string; code?: string }
+export type ConfigItem = {
+  title: string
+  tag: string
+  body: string
+  code?: string
+}
 
 export const CONFIG: ConfigItem[] = [
   {
     title: 'Extra directories',
+    tag: '--add-dir · --ro-dir',
     body: 'Expose more paths read-write or read-only — a shared cache, a sibling library.',
     code: 'fugue --ro-dir ~/.cache/go-build \\\n      --add-dir ../shared-lib \\\n      claude "..."',
   },
   {
     title: 'Shell wrappers',
+    tag: 'fugue shellenv',
     body: 'Route every agent through fugue automatically. POSIX (bash/zsh) and fish. Run command <agent> to bypass.',
     code: 'eval "$(fugue shellenv)"   # bash/zsh\nfugue shellenv fish | source\n\nclaude "..."      # sandboxed\ncommand claude    # bypass',
   },
   {
     title: 'Add any agent',
+    tag: 'profiles/<name>.env',
     body: 'A profile is four fields. Feed an agent’s docs to the bundled prompt template and drop the result in profiles/.',
     code: 'AGENT_CMD="myagent"\nAPI_KEY_VARS="MY_API_KEY"\nAPI_HOSTS="api.example.com"\nBACKENDS="native"',
   },

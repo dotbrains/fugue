@@ -565,26 +565,55 @@ h3 {
   color: var(--accent);
   border-color: var(--accent-dim);
 }
-/* install methods + config items: one per row, text left, full-width code right */
-.install-cards,
-.config-cards {
+/* install methods: one per row, text left, full-width command right */
+.install-cards {
   grid-template-columns: 1fr;
   gap: 16px;
 }
-.card.config {
+
+/* config options: label + icon on the left, a labeled mini terminal on right */
+.config-list {
   display: grid;
-  grid-template-columns: 280px minmax(0, 1fr);
-  gap: 24px;
+}
+.config-item {
+  display: grid;
+  grid-template-columns: 320px minmax(0, 1fr);
+  gap: 36px;
   align-items: center;
+  padding: 28px 0;
 }
-.config-head h3 {
+.config-item + .config-item {
+  border-top: 1px solid var(--border);
+}
+.config-ico {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: #15181d;
+  border: 1px solid var(--border);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+  margin-bottom: 14px;
+}
+.config-text h3 {
   margin: 0 0 8px;
+  font-size: 1.15rem;
 }
-.config-head p {
+.config-text p {
+  color: var(--muted);
   margin: 0;
 }
-.card.config .mini {
-  margin: 0;
+.config-term.term {
+  background: var(--bg);
+}
+.term-body.small {
+  font-size: 0.8rem;
+  line-height: 1.7;
+  padding: 14px 16px;
+  white-space: pre;
+  overflow-x: auto;
 }
 .card.install {
   display: grid;
@@ -994,10 +1023,13 @@ h3 {
     grid-template-columns: 1fr;
     gap: 24px;
   }
-  .card.install,
-  .card.config {
+  .card.install {
     grid-template-columns: 1fr;
     gap: 14px;
+  }
+  .config-item {
+    grid-template-columns: 1fr;
+    gap: 16px;
   }
   .trace-head {
     display: none;
