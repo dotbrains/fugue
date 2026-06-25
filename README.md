@@ -92,7 +92,10 @@ refuses to run rather than silently leak.
 ## Adding an agent
 
 Drop a `profiles/<name>.env` defining `AGENT_CMD`, `API_KEY_VARS`, `API_HOSTS`,
-and the `TELEMETRY_ENV` array. Add the CLI to the `Dockerfile`. That's it.
+`TELEMETRY_ENV`, and `BACKENDS`. Use `BACKENDS="native"` to run the agent's CLI
+from your host under the sandbox; to also bake it into the docker image, add the
+CLI to `package.json` and set `BACKENDS="docker native"`. See
+[docs/configuration.md](docs/configuration.md#adding-an-agent).
 
 ## Limitations
 

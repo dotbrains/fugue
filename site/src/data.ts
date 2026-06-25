@@ -175,8 +175,8 @@ export const CONFIG: ConfigItem[] = [
   {
     title: 'Add any agent',
     tag: 'profiles/<name>.env',
-    body: 'A profile is four fields. Feed an agent’s docs to the bundled prompt template and drop the result in profiles/.',
-    code: 'AGENT_CMD="myagent"\nAPI_KEY_VARS="MY_API_KEY"\nAPI_HOSTS="api.example.com"\nBACKENDS="native"',
+    body: 'A profile is five fields. Feed an agent’s docs to the bundled prompt template and drop the result in profiles/.',
+    code: 'AGENT_CMD="myagent"\nAPI_KEY_VARS="MY_API_KEY"\nAPI_HOSTS="api.example.com"\nTELEMETRY_ENV=("DO_NOT_TRACK=1")\nBACKENDS="native"',
   },
 ]
 
