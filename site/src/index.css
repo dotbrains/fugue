@@ -1165,7 +1165,7 @@ h3 {
   }
   .docs-layout {
     grid-template-columns: 1fr;
-    gap: 16px;
+    gap: 20px;
   }
   .docs-side {
     position: static;
@@ -1174,7 +1174,22 @@ h3 {
     flex-direction: row;
     flex-wrap: wrap;
     border-left: none;
-    gap: 4px 14px;
+    gap: 8px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .docs-side a {
+    margin-left: 0;
+    border: 1px solid var(--border-2);
+    border-radius: 8px;
+    padding: 6px 11px;
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    background: var(--panel);
+  }
+  .docs-side a:hover {
+    border-color: var(--accent);
+    color: var(--text);
   }
   .doc-cards {
     grid-template-columns: 1fr;
