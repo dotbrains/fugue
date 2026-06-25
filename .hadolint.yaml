@@ -1,10 +1,10 @@
 # hadolint configuration for the fugue image.
 #
-# Fail the build on warnings and above, but ignore the version-pinning rules:
-# the Dockerfile deliberately floats the agent CLI and apt package versions in
-# the scaffold ("Pin in CI; floating here") and pins them at release time.
+# Fail the build on warnings and above. The agent CLIs, su-exec source, and base
+# image are pinned (see the Dockerfile), so only the apt version-pin rule is
+# ignored — Debian drops old package versions from the repo, which makes pinning
+# them a recurring build-breaker for no reproducibility gain over the base digest.
 failure-threshold: warning
 
 ignored:
-  - DL3008 # apt-get install without an explicit version pin
-  - DL3016 # npm install -g without an explicit version pin
+  - DL3008 # apt-get install without an explicit version pin (see note above)

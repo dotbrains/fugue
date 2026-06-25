@@ -1,3 +1,6 @@
 *.log
 .DS_Store
 /dist/
+# package.json/package-lock.json are committed (they pin the image's agent CLIs),
+# but a local `npm install` should never commit a tree.
+node_modules/

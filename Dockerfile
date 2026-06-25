@@ -3,7 +3,14 @@
 # Design rule: nothing in this image may phone home on its own. No managed git
 # hooks, no telemetry collector, no audit JSONL. The only outbound traffic a
 # fugue session can make is to the model API (and only when --strict allows it).
-FROM node:22-bookworm-slim
+#
+# Versions are pinned for reproducible release images. Bump them intentionally
+# (and rebuild) — see docs/releasing.md.
+FROM node:22-bookworm-slim@sha256:813a7480f28fdadac1f7f5c824bcdad435b5bc1322a5968bbbdef8d058f9dff4
+
+# The agent CLI versions are pinned in package.json / package-lock.json (so
+# Dependabot can bump them); su-exec is built from a pinned source tag.
+ARG SU_EXEC_REF=v0.2
 
 # Runtime deps:
 #   nftables  — egress allowlist installed by fugue-entry
@@ -15,19 +22,21 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
       nftables ca-certificates dnsutils git curl \
  && rm -rf /var/lib/apt/lists/*
 
-# su-exec (tiny setuid-free privilege dropper)
-RUN curl -fsSL https://github.com/ncopa/su-exec/raw/master/su-exec.c -o /tmp/su-exec.c \
+# su-exec (tiny setuid-free privilege dropper), built from a pinned tag.
+RUN curl -fsSL "https://github.com/ncopa/su-exec/raw/${SU_EXEC_REF}/su-exec.c" -o /tmp/su-exec.c \
  && apt-get update && apt-get install -y --no-install-recommends gcc libc6-dev \
  && gcc -Wall -O2 /tmp/su-exec.c -o /usr/local/bin/su-exec \
  && apt-get purge -y gcc libc6-dev && apt-get autoremove -y \
  && rm -rf /var/lib/apt/lists/* /tmp/su-exec.c
 
-# The three agent CLIs. Pin in CI; floating here for the scaffold.
-RUN npm install -g \
-      @anthropic-ai/claude-code \
-      @openai/codex \
-      @google/gemini-cli \
+# The three agent CLIs, installed from the committed lockfile so the build is
+# reproducible and Dependabot owns version bumps. They land in node_modules and
+# are put on PATH (below) rather than installed globally.
+WORKDIR /opt/fugue
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev --no-audit --no-fund \
  && npm cache clean --force
+ENV PATH="/opt/fugue/node_modules/.bin:${PATH}"
 
 # Unprivileged agent user. $HOME is a tmpfs mount at runtime, so we only need
 # the uid/gid to line up with the launcher's --tmpfs uid=1001.
