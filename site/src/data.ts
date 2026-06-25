@@ -6,6 +6,38 @@ export const IMAGE = 'ghcr.io/dotbrains/fugue'
 
 export type Agent = { name: string; label: string; backends: string }
 
+// Egress hosts per agent (from each profile's API_HOSTS), used by the policy
+// builder to preview the docker --strict allowlist.
+export const AGENT_HOSTS: Record<string, string> = {
+  claude: 'api.anthropic.com',
+  codex: 'api.openai.com',
+  gemini: 'generativelanguage.googleapis.com',
+  opencode: 'api.anthropic.com api.openai.com openrouter.ai opencode.ai',
+  amp: 'ampcode.com',
+  copilot: 'api.githubcopilot.com api.github.com',
+  aider: 'api.anthropic.com api.openai.com',
+  goose: 'api.openai.com api.anthropic.com generativelanguage.googleapis.com',
+  auggie: 'api.augmentcode.com',
+  pi: 'api.anthropic.com api.openai.com pi.dev',
+  cursor: 'api.cursor.com api2.cursor.com auth.cursor.com',
+  cline: 'api.cline.bot api.anthropic.com api.openai.com',
+  kilo: 'api.kilo.ai app.kilo.ai api.anthropic.com api.openai.com',
+  droid: 'app.factory.ai api.factory.ai',
+}
+
+// The reads fugue's native backend denies by default (mirrors bin/fugue).
+export const SECRET_DENYLIST = [
+  '.ssh',
+  '.aws',
+  '.gnupg',
+  '.config/gh',
+  '.config/gcloud',
+  '.kube',
+  '.docker',
+  'Library/Keychains',
+]
+export const SECRET_DENY_FILES = ['.netrc', '.npmrc', '.pypirc']
+
 export const AGENTS: Agent[] = [
   { name: 'claude', label: 'Claude Code', backends: 'docker · native' },
   { name: 'codex', label: 'Codex', backends: 'docker · native' },

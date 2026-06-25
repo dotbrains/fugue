@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import PolicyBuilder from './PolicyBuilder'
 import {
   AGENTS,
   BACKENDS,
@@ -55,6 +56,7 @@ function Nav() {
           <a href="#how">How it works</a>
           <a href="#backends">Backends</a>
           <a href="#agents">Agents</a>
+          <a href="#policy-builder">Builder</a>
           <a href="#install">Install</a>
           <a className="nav-cta" href={REPO} target="_blank" rel="noreferrer">
             GitHub ↗
@@ -387,6 +389,7 @@ export default function App() {
         <Proof />
         <Agents />
         <Config />
+        <PolicyBuilder />
         <Install />
         <FailClosed />
       </main>
