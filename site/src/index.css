@@ -903,8 +903,7 @@ h3 {
   display: grid;
   gap: 16px;
   min-width: 0;
-  position: sticky;
-  top: 76px;
+  align-self: start;
 }
 .out-block {
   border: 1px solid var(--border);
@@ -1147,9 +1146,6 @@ h3 {
   }
   .builder {
     grid-template-columns: 1fr;
-  }
-  .builder-out {
-    position: static;
   }
   .dice {
     grid-template-columns: 1fr;
