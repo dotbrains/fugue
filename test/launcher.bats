@@ -44,3 +44,31 @@ setup() {
   run "$FUGUE" --image
   [ "$status" -ne 0 ]
 }
+
+@test "an unknown backend is rejected" {
+  run "$FUGUE" --backend bogus claude "hi"
+  [ "$status" -eq 2 ]
+  [[ "$output" == *"unknown backend"* ]]
+}
+
+@test "a native-only agent is rejected under the docker backend" {
+  # aider ships a native-only profile; the docker backend should refuse it
+  # before ever shelling out to docker.
+  run "$FUGUE" --backend docker aider "hi"
+  [ "$status" -eq 2 ]
+  [[ "$output" == *"does not support"* ]]
+}
+
+@test "shellenv prints a wrapper for a known agent" {
+  run "$FUGUE" shellenv
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"claude()"* ]]
+  [[ "$output" == *"command"* ]]
+}
+
+@test "shellenv fish emits fish function syntax" {
+  run "$FUGUE" shellenv fish
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"function claude"* ]]
+  [[ "$output" == *"end"* ]]
+}
