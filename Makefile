@@ -16,7 +16,7 @@ MMDC         ?= mmdc
 # Shell sources, split by how they're invoked:
 #   SCRIPTS  — executable entrypoints and helpers (have shebangs)
 #   PROFILES — sourced env fragments (carry a `# shellcheck shell=bash` directive)
-SCRIPTS  := bin/fugue src/fugue-entry $(wildcard scripts/*.sh)
+SCRIPTS  := bin/fugue src/fugue-entry install.sh $(wildcard scripts/*.sh)
 PROFILES := $(wildcard profiles/*.env)
 SHELL_SRC := $(SCRIPTS) $(PROFILES)
 
