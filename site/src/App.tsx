@@ -1,5 +1,6 @@
-import { useState, type ReactNode } from 'react'
+import { type ReactNode } from 'react'
 import { AgentIcon } from './AgentIcon'
+import { Code } from './Code'
 import DiceDemo from './DiceDemo'
 import PolicyBuilder from './PolicyBuilder'
 import {
@@ -13,36 +14,6 @@ import {
   TRACE,
   USAGE,
 } from './data'
-
-function CopyButton({ text }: { text: string }) {
-  const [copied, setCopied] = useState(false)
-  return (
-    <button
-      type="button"
-      className="copy"
-      aria-label="Copy to clipboard"
-      onClick={() => {
-        void navigator.clipboard?.writeText(text).then(() => {
-          setCopied(true)
-          setTimeout(() => setCopied(false), 1400)
-        })
-      }}
-    >
-      {copied ? 'copied' : 'copy'}
-    </button>
-  )
-}
-
-function Code({ children }: { children: string }) {
-  return (
-    <div className="code">
-      <CopyButton text={children} />
-      <pre>
-        <code>{children}</code>
-      </pre>
-    </div>
-  )
-}
 
 function Nav() {
   return (
@@ -59,7 +30,7 @@ function Nav() {
           <a href="#backends">Backends</a>
           <a href="#agents">Agents</a>
           <a href="#policy-builder">Builder</a>
-          <a href="#install">Install</a>
+          <a href="/docs">Docs</a>
           <a className="nav-cta" href={REPO} target="_blank" rel="noreferrer">
             GitHub ↗
           </a>
