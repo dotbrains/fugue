@@ -192,8 +192,9 @@ done
 abspath() { (cd "$1" 2>/dev/null && pwd) || die "no such directory: $1"; }
 
 # Shred the native backend's temp tree (ephemeral $HOME, workspace copy, and the
-# generated profile). Invoked indirectly via `trap ... EXIT` in run_native.
-# shellcheck disable=SC2329
+# generated profile). Invoked indirectly via `trap ... EXIT` in run_native, so
+# shellcheck can't see the call site (SC2329 unused / SC2317 unreachable body).
+# shellcheck disable=SC2329,SC2317
 scrub_native() {
   local rc=$?
   [[ -n "$NATIVE_TMP" ]] || return
