@@ -30,7 +30,7 @@ function Nav() {
           <a href="#backends">Backends</a>
           <a href="#agents">Agents</a>
           <a href="#policy-builder">Builder</a>
-          <a href="/docs">Docs</a>
+          <a href="/docs">Docs ↗</a>
           <a className="nav-cta" href={REPO} target="_blank" rel="noreferrer">
             GitHub ↗
           </a>
