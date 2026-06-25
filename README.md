@@ -1,5 +1,8 @@
 # fugue
 
+[![CI](https://github.com/dotbrains/fugue/actions/workflows/ci.yml/badge.svg)](https://github.com/dotbrains/fugue/actions/workflows/ci.yml)
+[![code-scanning](https://github.com/dotbrains/fugue/actions/workflows/code-scanning.yml/badge.svg)](https://github.com/dotbrains/fugue/actions/workflows/code-scanning.yml)
+
 > Incognito mode for AI coding agents — Claude, Codex, Gemini.
 
 A *fugue state* is dissociative amnesia: you act, then keep no memory of having
@@ -74,6 +77,29 @@ and the `TELEMETRY_ENV` array. Add the CLI to the `Dockerfile`. That's it.
 
 See [docs/threat-model.md](docs/threat-model.md) for what fugue does and does not
 defend against.
+
+## Documentation
+
+Full docs live in [`docs/`](docs/):
+
+- [Quickstart](docs/quickstart.md) — first no-trace session in minutes.
+- [Usage](docs/usage.md) — every flag, agent, and exit code.
+- [Configuration](docs/configuration.md) — the profile contract and `FUGUE_*` env.
+- [Architecture](docs/architecture.md) — how a session is built and torn down.
+- [Security](docs/security.md) and the [threat model](docs/threat-model.md).
+- [Development](docs/development.md) — the quality gate and contributor workflow.
+- [Architecture decisions](docs/adr/) — why fugue is built the way it is.
+
+## Contributing
+
+Run `make check` before opening a PR; it runs the same gate CI does (shfmt,
+shellcheck, hadolint, bats, markdownlint, mermaid, and the image build).
+Install the matching pre-commit hooks with `pre-commit install`. See
+[docs/reference/CONTRIBUTING.md](docs/reference/CONTRIBUTING.md).
+
+AI coding agents working in this repo should start at [AGENTS.md](AGENTS.md) —
+the canonical agent guide (command surface, code map, and the security
+invariants that must not be weakened).
 
 ## License
 
