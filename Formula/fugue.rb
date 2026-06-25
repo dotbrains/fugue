@@ -1,15 +1,14 @@
-# Homebrew formula for fugue.
+# Homebrew formula for fugue — the canonical template.
 #
-# Canonical copy lives here; on release, copy it to dotbrains/homebrew-tap as
-# Formula/fugue.rb and fill in `url`/`sha256` for the tagged tarball so users can
-# `brew install dotbrains/tap/fugue`. Until then, `--HEAD` installs from main.
+# On each stable tag, the release workflow (.github/workflows/release.yml)
+# renders this with the tagged tarball's url/sha256 and pushes it to
+# dotbrains/homebrew-tap, so `brew install dotbrains/tap/fugue` works. The url
+# and sha256 below are placeholders the workflow overwrites; `--HEAD` installs
+# from main regardless.
 class Fugue < Formula
   desc "Incognito mode for AI coding agents: no-trace, sandboxed sessions"
   homepage "https://github.com/dotbrains/fugue"
-  # On release, point at the tagged tarball and set its sha256:
-  #   url "https://github.com/dotbrains/fugue/archive/refs/tags/v0.1.0.tar.gz"
-  #   sha256 "..."
-  url "https://github.com/dotbrains/fugue/archive/refs/tags/v0.1.0.tar.gz"
+  url "https://github.com/dotbrains/fugue/archive/refs/tags/v0.0.0.tar.gz"
   sha256 "0000000000000000000000000000000000000000000000000000000000000000"
   # PolyForm Shield 1.0.0 is not an SPDX identifier Homebrew can represent.
   license :cannot_represent

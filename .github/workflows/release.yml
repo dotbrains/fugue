@@ -68,3 +68,51 @@ jobs:
         with:
           generate_release_notes: true
           prerelease: ${{ contains(github.ref, '-rc') }}
+
+  homebrew:
+    name: publish Homebrew formula
+    needs: publish
+    # Only stable tags update the tap; -rc prereleases don't.
+    if: ${{ !contains(github.ref, '-rc') }}
+    runs-on: blacksmith-4vcpu-ubuntu-2404
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Render the formula for this tag
+        id: render
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          url="https://github.com/${GITHUB_REPOSITORY}/archive/refs/tags/${GITHUB_REF_NAME}.tar.gz"
+          curl -fsSL "$url" -o source.tar.gz
+          sha="$(sha256sum source.tar.gz | cut -d ' ' -f1)"
+          # Overwrite the placeholder url/sha256 in the committed template.
+          sed -e "s#^  url .*#  url \"${url}\"#" \
+              -e "s#^  sha256 .*#  sha256 \"${sha}\"#" \
+              Formula/fugue.rb >rendered.rb
+          echo "version=${version}" >>"$GITHUB_OUTPUT"
+          echo "fugue ${version} → sha256 ${sha}"
+
+      - name: Push to dotbrains/homebrew-tap
+        env:
+          TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+        run: |
+          if [ -z "${TOKEN}" ]; then
+            echo "HOMEBREW_TAP_TOKEN is not set; skipping the tap publish." >&2
+            echo "Add a repo secret with push access to dotbrains/homebrew-tap." >&2
+            exit 0
+          fi
+          git clone --depth 1 \
+            "https://x-access-token:${TOKEN}@github.com/dotbrains/homebrew-tap.git" tap
+          mkdir -p tap/Formula
+          cp rendered.rb tap/Formula/fugue.rb
+          cd tap
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Formula/fugue.rb
+          if git diff --cached --quiet; then
+            echo "Formula already up to date; nothing to publish."
+            exit 0
+          fi
+          git commit -m "fugue ${{ steps.render.outputs.version }}"
+          git push

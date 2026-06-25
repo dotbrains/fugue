@@ -50,11 +50,29 @@ as a prerelease, but does **not** move `latest`.
    ```
 
 4. Watch the `release` workflow in the Actions tab. When it's green, the image
-   is live:
+   is live and the Homebrew formula is published:
 
    ```sh
    docker pull ghcr.io/dotbrains/fugue:0.1.0
+   brew install dotbrains/tap/fugue
    ```
+
+### Homebrew formula
+
+The `homebrew` job in the release workflow publishes the formula automatically
+on each **stable** tag (not `-rc`): it downloads the tag's source tarball,
+computes its `sha256`, renders [`Formula/fugue.rb`](../Formula/fugue.rb) with the
+real `url`/`sha256`, and commits it to `dotbrains/homebrew-tap` as
+`Formula/fugue.rb`.
+
+This needs a one-time secret: a fine-grained or classic **personal access token
+with `contents: write` (push) access to `dotbrains/homebrew-tap`**, stored on the
+fugue repo as the `HOMEBREW_TAP_TOKEN` secret (the default `GITHUB_TOKEN` can't
+push to another repo). Without it, the release still succeeds and the job logs a
+skip — only the tap update is missed.
+
+`Formula/fugue.rb` here is the template; its `url`/`sha256` are placeholders the
+workflow overwrites. `--HEAD` installs work from `main` without a published tag.
 
 ### First release only
 
