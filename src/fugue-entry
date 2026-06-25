@@ -8,8 +8,13 @@
 #
 set -euo pipefail
 
-AGENT_CMD="${1:?fugue-entry: missing agent command}"; shift
-HOST_CWD="${1:-}"; shift || true   # reserved for ephemeral copy-out, unused inside
+AGENT_CMD="${1:?fugue-entry: missing agent command}"
+shift
+# HOST_CWD is part of the argv contract from bin/fugue; reserved for ephemeral
+# copy-out and intentionally unread inside the container.
+# shellcheck disable=SC2034
+HOST_CWD="${1:-}"
+shift || true
 
 log() { printf 'fugue-entry: %s\n' "$*" >&2; }
 

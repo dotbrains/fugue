@@ -1,0 +1,5 @@
+# ShellCheck configuration for fugue.
+#
+# Follow `source`d files so the profile sourced by bin/fugue is analyzed and
+# `# shellcheck source=` directives resolve.
+external-sources=true

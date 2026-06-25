@@ -36,22 +36,46 @@ STRICT=1
 EPHEMERAL_WS=0
 KEEP_ON_ERROR=0
 
-die() { printf 'fugue: %s\n' "$*" >&2; exit 2; }
+die() {
+  printf 'fugue: %s\n' "$*" >&2
+  exit 2
+}
 
-usage() { sed -n '2,40p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; exit 0; }
+usage() {
+  sed -n '2,40p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
+  exit 0
+}
 
 # --- parse flags (stop at the agent name) -----------------------------------
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --strict)              STRICT=1; shift ;;
-    --no-net-isolation)    STRICT=0; shift ;;
-    --ephemeral-workspace) EPHEMERAL_WS=1; shift ;;
-    --keep-on-error)       KEEP_ON_ERROR=1; shift ;;
-    --image)               IMAGE="${2:?--image needs a value}"; shift 2 ;;
-    -h|--help)             usage ;;
-    --) shift; break ;;
+    --strict)
+      STRICT=1
+      shift
+      ;;
+    --no-net-isolation)
+      STRICT=0
+      shift
+      ;;
+    --ephemeral-workspace)
+      EPHEMERAL_WS=1
+      shift
+      ;;
+    --keep-on-error)
+      KEEP_ON_ERROR=1
+      shift
+      ;;
+    --image)
+      IMAGE="${2:?--image needs a value}"
+      shift 2
+      ;;
+    -h | --help) usage ;;
+    --)
+      shift
+      break
+      ;;
     -*) die "unknown flag: $1" ;;
-    *)  break ;;
+    *) break ;;
   esac
 done
 
@@ -60,7 +84,15 @@ AGENT="${1:-}"
 shift || true
 
 PROFILE="$FUGUE_ROOT/profiles/$AGENT.env"
-[[ -f "$PROFILE" ]] || die "unknown agent '$AGENT' (no profile at $PROFILE). known: $(cd "$FUGUE_ROOT/profiles" && ls *.env | sed 's/\.env$//' | tr '\n' ' ')"
+known_agents() {
+  local p
+  for p in "$FUGUE_ROOT"/profiles/*.env; do
+    [[ -e "$p" ]] || continue
+    p="${p##*/}"
+    printf '%s ' "${p%.env}"
+  done
+}
+[[ -f "$PROFILE" ]] || die "unknown agent '$AGENT' (no profile at $PROFILE). known: $(known_agents)"
 
 command -v docker >/dev/null || die "docker not found on PATH"
 
@@ -73,12 +105,15 @@ source "$PROFILE"
 declare -a CRED_ENV=()
 for var in ${API_KEY_VARS:-}; do
   if [[ -n "${!var:-}" ]]; then
-    CRED_ENV+=( -e "$var" )
+    CRED_ENV+=(-e "$var")
   fi
 done
 [[ ${#CRED_ENV[@]} -gt 0 ]] || die "no API key in env for $AGENT (expected one of: ${API_KEY_VARS:-?})"
 
 # --- assemble docker run -----------------------------------------------------
+# The tmpfs/mount specs below carry commas inside single values (rw,exec,...),
+# which shellcheck misreads as array-element separators (SC2054).
+# shellcheck disable=SC2054
 declare -a DOCKER_ARGS=(
   run --rm -it
   --hostname fugue
@@ -96,31 +131,32 @@ declare -a DOCKER_ARGS=(
 
 # per-agent telemetry / analytics kill switches (from profile)
 for kv in "${TELEMETRY_ENV[@]}"; do
-  DOCKER_ARGS+=( -e "$kv" )
+  DOCKER_ARGS+=(-e "$kv")
 done
 
-DOCKER_ARGS+=( "${CRED_ENV[@]}" )
+DOCKER_ARGS+=("${CRED_ENV[@]}")
 
 # workspace mount
 if [[ "$EPHEMERAL_WS" -eq 1 ]]; then
   # copy-on-tmpfs: agent edits a throwaway copy, host cwd is never touched
-  DOCKER_ARGS+=( --tmpfs /workspace:rw,exec,mode=0777 -e FUGUE_EPHEMERAL_WS=1 )
+  # shellcheck disable=SC2054  # commas live inside the tmpfs spec, not between args
+  DOCKER_ARGS+=(--tmpfs /workspace:rw,exec,mode=0777 -e FUGUE_EPHEMERAL_WS=1)
   HOST_CWD="$(pwd)"
 else
-  DOCKER_ARGS+=( -v "$(pwd):/workspace:rw" )
+  DOCKER_ARGS+=(-v "$(pwd):/workspace:rw")
   HOST_CWD=""
 fi
-DOCKER_ARGS+=( -w /workspace )
+DOCKER_ARGS+=(-w /workspace)
 
 # egress isolation
 if [[ "$STRICT" -eq 1 ]]; then
   # NET_ADMIN lets the entrypoint install an nftables allowlist for API_HOSTS.
-  DOCKER_ARGS+=( --cap-add NET_ADMIN -e "FUGUE_ALLOW_HOSTS=$API_HOSTS" -e FUGUE_STRICT=1 )
+  DOCKER_ARGS+=(--cap-add NET_ADMIN -e "FUGUE_ALLOW_HOSTS=$API_HOSTS" -e FUGUE_STRICT=1)
 else
-  DOCKER_ARGS+=( -e FUGUE_STRICT=0 )
+  DOCKER_ARGS+=(-e FUGUE_STRICT=0)
 fi
 
-[[ "$KEEP_ON_ERROR" -eq 1 ]] && DOCKER_ARGS+=( -e FUGUE_KEEP_ON_ERROR=1 )
+[[ "$KEEP_ON_ERROR" -eq 1 ]] && DOCKER_ARGS+=(-e FUGUE_KEEP_ON_ERROR=1)
 
 # --- run ---------------------------------------------------------------------
 printf 'fugue: %s session — strict=%s ephemeral-ws=%s — no trace will persist\n' \
