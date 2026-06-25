@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { AgentIcon } from './AgentIcon'
 import DiceDemo from './DiceDemo'
 import PolicyBuilder from './PolicyBuilder'
@@ -230,6 +230,38 @@ function Grants() {
   )
 }
 
+function proofLine(line: string, i: number): ReactNode {
+  let inner: ReactNode = line
+  if (line.trim() === '') {
+    inner = ' '
+  } else if (/Operation not permitted/.test(line)) {
+    inner = <span className="hl-deny">{line}</span>
+  } else if (line.includes('✓')) {
+    inner = <span className="hl-ok">{line}</span>
+  } else if (line.trimStart().startsWith('#')) {
+    inner = <span className="hl-comment">{line}</span>
+  } else if (line.startsWith('fugue:')) {
+    inner = <span className="dim">{line}</span>
+  } else {
+    const m = line.match(/^(\s*)(\[agent\]\s)?(\$)(\s.*)$/)
+    if (m) {
+      inner = (
+        <>
+          {m[1]}
+          {m[2] ? <span className="dim">{m[2]}</span> : null}
+          <span className="hl-prompt">{m[3]}</span>
+          <span className="hl-cmd">{m[4]}</span>
+        </>
+      )
+    }
+  }
+  return (
+    <span className="ln" key={i}>
+      {inner}
+    </span>
+  )
+}
+
 function Proof() {
   return (
     <section className="section alt">
@@ -247,8 +279,50 @@ function Proof() {
             <span className="term-title">native backend · sandbox-exec</span>
           </div>
           <pre className="term-body">
-            <code>{PROOF}</code>
+            <code>{PROOF.split('\n').map(proofLine)}</code>
           </pre>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function Generate() {
+  return (
+    <section className="section" id="generate">
+      <div className="container narrow">
+        <h2>Generate your own setup with an LLM</h2>
+        <p className="section-lede">
+          Hand a ready-made prompt to Claude, Codex, or Gemini. It inspects
+          fugue’s real profiles and launcher, detects your toolchains and
+          installed agents, then emits the exact command, a new
+          <code>profiles/&lt;name&gt;.env</code> if needed, and the sandbox
+          policy fugue will apply — tailored to your machine.
+        </p>
+        <div className="gen-card">
+          <p>
+            The prompt keeps the egress allowlist minimal, never invents
+            telemetry variables, separates read-only from read-write grants, and
+            keeps SSH keys, cloud creds, and other secrets denied by default.
+          </p>
+          <div className="gen-actions">
+            <a
+              className="btn btn-primary"
+              href="/llm-instructions.txt"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Open the copy-paste prompt ↗
+            </a>
+            <a
+              className="btn"
+              href={`${REPO}/blob/main/prompts/new-agent-profile.md`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              New-agent profile prompt ↗
+            </a>
+          </div>
         </div>
       </div>
     </section>
@@ -400,6 +474,7 @@ export default function App() {
         <Agents />
         <Config />
         <PolicyBuilder />
+        <Generate />
         <Install />
         <FailClosed />
       </main>

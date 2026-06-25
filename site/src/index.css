@@ -287,6 +287,22 @@ h3 {
   color: var(--accent);
   margin-right: 6px;
 }
+/* proof terminal highlighting */
+.term-body .hl-prompt {
+  color: var(--accent);
+}
+.term-body .hl-cmd {
+  color: var(--text);
+}
+.term-body .hl-deny {
+  color: var(--red);
+}
+.term-body .hl-ok {
+  color: var(--green);
+}
+.term-body .hl-comment {
+  color: var(--faint);
+}
 .cursor {
   display: inline-block;
   width: 8px;
@@ -911,6 +927,23 @@ h3 {
   padding: 12px 14px;
   font-size: 0.88rem;
   color: var(--text);
+}
+
+/* ---------- generate-with-LLM ---------- */
+.gen-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+}
+.gen-card p {
+  color: var(--muted);
+  margin: 0 0 18px;
+}
+.gen-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 /* ---------- footer ---------- */

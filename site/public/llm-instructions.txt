@@ -1,0 +1,104 @@
+Generate a tailored fugue setup for me.
+
+fugue runs an AI coding agent in a no-trace, sandboxed session. It has two
+backends: docker (a --rm container with a tmpfs $HOME and an nftables egress
+allowlist) and native (the host's agent under macOS sandbox-exec, with writes
+leashed to the project and reads of secrets denied by the kernel). Your job is
+to produce a setup that fits my machine, modeled on how fugue actually works.
+
+## Step 1: Inspect the real references first
+
+Read these before proposing anything. Mirror their structure and least-privilege
+patterns; do not invent a different model.
+
+- https://github.com/dotbrains/fugue/blob/main/bin/fugue
+      the launcher: flag parsing, backend dispatch, the docker run assembly, and
+      native_profile() which emits the macOS sandbox-exec (SBPL) policy
+- https://github.com/dotbrains/fugue/blob/main/src/fugue-entry
+      the docker entrypoint: the nftables egress allowlist and the scrub trap
+- https://github.com/dotbrains/fugue/tree/main/profiles
+      one <agent>.env per agent — the contract you must match
+- https://github.com/dotbrains/fugue/blob/main/docs/configuration.md
+      the profile fields and the environment surface
+- https://github.com/dotbrains/fugue/blob/main/docs/architecture.md
+      how each backend sandboxes, end to end
+- https://github.com/dotbrains/fugue/blob/main/docs/threat-model.md
+      what each backend does and does NOT defend against
+- https://github.com/dotbrains/fugue/blob/main/prompts/new-agent-profile.md
+      the template for writing a new agent profile
+
+## Step 2: Auto-detect as much as you can
+
+Do not ask me a long questionnaire up front. Detect first, then confirm once.
+
+Detect:
+
+- my absolute home directory and current shell (and its rc file)
+- whether Docker is installed and its daemon is running (decides docker backend)
+- whether I'm on macOS with sandbox-exec available (decides native backend)
+- installed toolchains: Node, Bun, Python/uv, Go, Rust, and version managers
+- installed agent CLIs: claude, codex, gemini, opencode, amp, copilot, aider,
+  goose, auggie, pi, cursor-agent, cline, kilo, droid
+- machine-global dotfiles that matter: ~/.gitconfig, ~/.npmrc, ~/.netrc,
+  and credential stores (~/.ssh, ~/.aws, ~/.gnupg, ~/.config/gh)
+
+Map what you find:
+
+- agent installed but no profile in profiles/ -> you'll write a new profile
+- Docker present -> default to the docker backend (strongest guarantee)
+- macOS, no Docker -> default to the native backend
+- detected toolchain/cache dirs the agent legitimately needs -> candidate
+  --ro-dir grants (never auto-grant; propose them in Step 3)
+
+## Step 3: Ask one combined follow-up question
+
+After detection, summarize what you found and ask ONE question covering:
+
+- which agent to run, and which backend
+- which project directory should be read/write (default: the current directory)
+- which extra paths, if any, should be read-only (--ro-dir)
+- which extra paths, if any, should be explicitly denied (FUGUE_DENY_READ)
+- any detected agent you should write a new profiles/<name>.env for
+
+Do not ask separate questions for HOME, shell, or toolchains unless detection
+failed.
+
+## Step 4: Produce all outputs in one response
+
+1. If an agent needs a profile: a complete profiles/<name>.env with the five
+   fields AGENT_CMD, API_KEY_VARS, API_HOSTS, TELEMETRY_ENV, BACKENDS — matching
+   the format and the shellcheck header used by the existing profiles.
+
+2. The exact command(s) to run, e.g.:
+       fugue --backend native --ro-dir <path> <agent> "<task>"
+   include FUGUE_DENY_READ="..." as an env prefix only if I asked for extra
+   read denials.
+
+3. For the native backend: the SBPL policy fugue will apply, so I can audit it —
+   (allow default), then (deny file-write*) re-allowing only the project, the
+   ephemeral $HOME, temp, and any --add-dir paths, then (deny file-read*) for
+   ~/.ssh, ~/.aws, ~/.gnupg, ~/.config/gh, ~/.config/gcloud, ~/.kube, ~/.docker,
+   ~/Library/Keychains, ~/.netrc, ~/.npmrc, ~/.pypirc, plus my extra denials.
+
+4. A shell snippet for my rc file:
+       eval "$(fugue shellenv)"        # bash/zsh   (fish: fugue shellenv fish | source)
+   so each agent routes through fugue; note that `command <agent>` bypasses it.
+
+5. A short table explaining each access grant, and a verification checklist
+   (e.g. confirm `cat ~/.ssh/id_*` fails inside the session).
+
+## Requirements
+
+- Start from deny-by-default; never grant my whole home directory.
+- Keep API_HOSTS to the smallest set that lets the agent work — every host is a
+  hole in the egress allowlist.
+- Do NOT invent telemetry/env variable names. If a fact isn't in the agent's
+  docs, omit it and add a # comment that it's unverified. Always include
+  DO_NOT_TRACK=1 as a baseline.
+- Separate read-only grants from read/write grants; prefer narrow paths.
+- Keep Docker sockets, SSH agent sockets, browser data, and shell startup files
+  denied unless the task clearly needs them.
+- Pick docker when a hard network leash matters; native trades that for running
+  on the host with no container (see the threat model).
+- Keep every output commented and easy to audit, and self-contained so I can
+  save or run it directly.
