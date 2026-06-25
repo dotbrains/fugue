@@ -67,6 +67,9 @@ function Hero() {
             <a className="btn btn-primary" href="#install">
               Install
             </a>
+            <a className="btn" href="/docs">
+              Read the docs ↗
+            </a>
             <a className="btn" href="#how">
               How it works
             </a>
@@ -448,9 +451,7 @@ function Footer() {
           <a href={REPO} target="_blank" rel="noreferrer">
             GitHub
           </a>
-          <a href={`${REPO}/tree/main/docs`} target="_blank" rel="noreferrer">
-            Docs
-          </a>
+          <a href="/docs">Docs</a>
           <a href={`${REPO}/blob/main/docs/threat-model.md`} target="_blank" rel="noreferrer">
             Threat model
           </a>
