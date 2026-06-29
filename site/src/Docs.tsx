@@ -1,5 +1,6 @@
 import { AgentIcon } from './AgentIcon'
 import { Code } from './Code'
+import { GhostMark } from './GhostMark'
 import { AGENT_HOSTS, AGENTS, BACKENDS, INSTALL, REPO, USAGE } from './data'
 
 const NAV = [
@@ -61,7 +62,7 @@ function DocsNav() {
       <div className="container nav-inner">
         <a className="brand" href="/">
           <span className="brand-mark" aria-hidden="true">
-            {'>_'}
+            <GhostMark />
           </span>
           fugue <span className="brand-sub">/ docs</span>
         </a>
@@ -325,7 +326,7 @@ export default function Docs() {
         <div className="container footer-inner">
           <a className="brand" href="/">
             <span className="brand-mark" aria-hidden="true">
-              {'>_'}
+              <GhostMark />
             </span>
             fugue
           </a>
