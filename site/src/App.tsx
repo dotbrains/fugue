@@ -2,6 +2,7 @@ import { type ReactNode } from 'react'
 import { AgentIcon } from './AgentIcon'
 import { Code } from './Code'
 import DiceDemo from './DiceDemo'
+import { GhostMark } from './GhostMark'
 import PolicyBuilder from './PolicyBuilder'
 import {
   AGENTS,
@@ -21,7 +22,7 @@ function Nav() {
       <div className="container nav-inner">
         <a className="brand" href="#top">
           <span className="brand-mark" aria-hidden="true">
-            {'>_'}
+            <GhostMark />
           </span>
           fugue
         </a>
@@ -436,7 +437,7 @@ function Footer() {
         <div>
           <a className="brand" href="#top">
             <span className="brand-mark" aria-hidden="true">
-              {'>_'}
+              <GhostMark />
             </span>
             fugue
           </a>
