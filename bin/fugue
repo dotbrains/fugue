@@ -65,43 +65,8 @@ usage() {
   exit 0
 }
 
-known_agents() {
-  local p
-  for p in "$FUGUE_ROOT"/profiles/*.env; do
-    [[ -e "$p" ]] || continue
-    p="${p##*/}"
-    printf '%s ' "${p%.env}"
-  done
-}
-
-# --- shellenv subcommand -----------------------------------------------------
-# Emit shell functions so `claude ...` transparently becomes `fugue claude ...`.
-# `command claude` still runs the unsandboxed agent (the shell builtin skips the
-# function), matching the documented bypass.
-# This function deliberately prints literal shell ($argv, $(...)) for the user's
-# rc file, so single-quoted expansions are intentional.
-# shellcheck disable=SC2016
-emit_shellenv() {
-  local shell="${1:-posix}" agent self
-  self="${BASH_SOURCE[0]}"
-  case "$shell" in
-    fish)
-      printf '# fugue shell wrappers — add to ~/.config/fish/config.fish:\n'
-      printf '#   %s shellenv fish | source\n' "$self"
-      for agent in $(known_agents); do
-        printf 'function %s; command %s %s $argv; end\n' "$agent" "$self" "$agent"
-      done
-      ;;
-    bash | zsh | posix)
-      printf '# fugue shell wrappers — add to your ~/.%src:\n' "${shell/posix/bash}"
-      printf '#   eval "$(%s shellenv %s)"\n' "$self" "${shell/posix/bash}"
-      for agent in $(known_agents); do
-        printf '%s() { command %s %s "$@"; }\n' "$agent" "$self" "$agent"
-      done
-      ;;
-    *) die "unknown shell '$shell' for shellenv (try: bash | zsh | fish)" ;;
-  esac
-}
+# shellcheck source=bin/lib/fugue-shellenv
+source "$FUGUE_ROOT/bin/lib/fugue-shellenv"
 
 if [[ "${1:-}" == "shellenv" ]]; then
   shift
