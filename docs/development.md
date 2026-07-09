@@ -39,6 +39,7 @@ Each gate is also a standalone target:
 | `make check:site`       | npm        | type-check and build the docs site                   |
 | `make check:actions`    | actionlint | the workflow YAML (config in `.github/actionlint.yaml`) |
 | `make check:secrets`    | gitleaks   | no secrets are committed                             |
+| `make check:budgets`    | node       | file-size and flat-directory budgets                 |
 
 `make fmt` auto-formats the shell sources. `make help` lists everything.
 
@@ -62,6 +63,11 @@ make check:format SHFMT=/path/to/shfmt
 - **Tests need no Docker.** The bats suite exercises only the launcher paths
   that resolve before `docker run` (help, bad flags, unknown agent, the profile
   contract), so it's fast and hermetic.
+- **LOC budgets are enforced.** `scripts/check-file-sizes.mjs` and
+  `scripts/check-flat-directories.mjs` read tracked files through Git and use
+  `scripts/*-budgets.json` for thresholds. Generated lockfiles and build output
+  are excluded; intentional exceptions should be explicit in the JSON with the
+  narrowest practical limit.
 
 ## CI
 

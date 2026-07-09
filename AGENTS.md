@@ -86,6 +86,7 @@ make check:build      # docker build     (image)
 make check:site       # npm build        (site)
 make check:actions    # actionlint       (workflow YAML)
 make check:secrets    # gitleaks         (no committed secrets)
+make check:budgets    # file-size and flat-directory budgets
 ```
 
 Tool binaries are overridable, e.g. `make check:format SHFMT=/path/to/shfmt`.
@@ -106,6 +107,9 @@ each gate is wired. CI runs the same targets, so green locally means green in CI
 - **Mermaid in docs is validated.** Inside a `mermaid` block, avoid `;` (read as
   a statement separator) and `<...>` angle brackets (read as arrows) in message
   text — they break the parser. Run `make check:mermaid` after editing diagrams.
+- **LOC budgets are enforced.** Keep source/docs/scripts below the configured
+  line-count budget and avoid flat directories with too many direct files.
+  Update `scripts/*-budgets.json` only for explicit, justified exceptions.
 - **The Dockerfile floats versions** in the scaffold and pins at release;
   `.hadolint.yaml` ignores the version-pin rules.
 - **Commits** follow Conventional Commits (`feat:`, `fix:`, `docs:`, `ci:`,

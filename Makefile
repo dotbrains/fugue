@@ -13,6 +13,7 @@ DOCKER       ?= docker
 MARKDOWNLINT ?= markdownlint-cli2
 MMDC         ?= mmdc
 NPM          ?= npm
+NODE         ?= node
 
 # Shell sources, split by how they're invoked:
 #   SCRIPTS  — executable entrypoints and helpers (have shebangs)
@@ -28,7 +29,8 @@ IMAGE ?= ghcr.io/dotbrains/fugue:latest
 
 .PHONY: help check fmt \
         check\:format check\:lint check\:dockerfile check\:tests check\:build \
-        check\:markdown check\:mermaid check\:site check\:actions check\:secrets
+        check\:markdown check\:mermaid check\:site check\:actions check\:secrets \
+        check\:budgets
 
 help:
 	@echo "fugue make targets:"
@@ -44,10 +46,12 @@ help:
 	@echo "  make check:site       type-check and build the docs site"
 	@echo "  make check:actions    actionlint the workflow YAML"
 	@echo "  make check:secrets    gitleaks secret scan"
+	@echo "  make check:budgets    enforce file-size and flat-directory budgets"
 
 # The aggregate gate, mirroring the CI job order. Invoke the colon-named targets
 # recursively so both GNU Make and BSD Make handle the target names consistently.
 check:
+	$(MAKE) check:budgets
 	$(MAKE) check:format
 	$(MAKE) check:lint
 	$(MAKE) check:dockerfile
@@ -92,3 +96,7 @@ check\:actions:
 
 check\:secrets:
 	gitleaks detect --no-banner --redact --source .
+
+check\:budgets:
+	$(NODE) scripts/check-file-sizes.mjs
+	$(NODE) scripts/check-flat-directories.mjs

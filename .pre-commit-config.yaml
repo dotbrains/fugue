@@ -18,14 +18,20 @@ repos:
         entry: make check:format
         language: system
         pass_filenames: false
-        files: '^(bin/fugue|src/fugue-entry|scripts/.*\.sh|profiles/.*\.env)$'
+        files: '^(bin/fugue|bin/lib/fugue-.*|src/fugue-entry|scripts/.*\.sh|profiles/.*\.env)$'
 
       - id: shellcheck
         name: shellcheck
         entry: make check:lint
         language: system
         pass_filenames: false
-        files: '^(bin/fugue|src/fugue-entry|scripts/.*\.sh|profiles/.*\.env)$'
+        files: '^(bin/fugue|bin/lib/fugue-.*|src/fugue-entry|scripts/.*\.sh|profiles/.*\.env)$'
+
+      - id: loc-budgets
+        name: LOC and directory budgets
+        entry: make check:budgets
+        language: system
+        pass_filenames: false
 
       - id: hadolint
         name: hadolint
@@ -39,7 +45,7 @@ repos:
         entry: make check:tests
         language: system
         pass_filenames: false
-        files: '^(bin/fugue|profiles/.*\.env|test/.*\.bats)$'
+        files: '^(bin/fugue|bin/lib/fugue-.*|profiles/.*\.env|test/.*\.bats)$'
 
       - id: markdownlint
         name: markdownlint
@@ -74,4 +80,4 @@ repos:
         language: system
         pass_filenames: false
         stages: [pre-push]
-        files: '^(Dockerfile|bin/fugue|src/fugue-entry|profiles/.*\.env)$'
+        files: '^(Dockerfile|bin/fugue|bin/lib/fugue-.*|src/fugue-entry|profiles/.*\.env)$'

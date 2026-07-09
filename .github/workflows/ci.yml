@@ -54,6 +54,9 @@ jobs:
           sudo mv shfmt hadolint gitleaks actionlint /usr/local/bin/
           npm install -g markdownlint-cli2 @mermaid-js/mermaid-cli
 
+      - name: Enforce LOC budgets
+        run: make check:budgets
+
       - name: Verify formatting
         run: make check:format
 
