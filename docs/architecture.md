@@ -72,7 +72,10 @@ What it provides vs. the docker backend:
   hard egress allowlist.
 
 Extra read denials can be added via `FUGUE_DENY_READ` (space-separated absolute
-subpaths).
+subpaths). Machine-local Seatbelt rules can be appended with
+`--append-profile <path>`; fugue loads those profiles after its generated rules,
+then denies writes to the appended profile files themselves. Appended profiles
+cannot reopen paths that fugue already denies.
 
 ## The launcher: `bin/fugue`
 

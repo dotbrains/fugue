@@ -60,6 +60,7 @@ a brand-new agent is just a new profile ([configuration.md](configuration.md#add
 | `--add-dir <path>`        | —        | Also expose `<path>` **read-write** inside the sandbox (repeatable).                 |
 | `--ro-dir <path>`         | —        | Also expose `<path>` **read-only** inside the sandbox (repeatable).                  |
 | `--share-home`            | off      | native: keep the real `$HOME` (for agents that need your host login) instead of an ephemeral one. |
+| `--append-profile <path>` | —        | native: append custom Seatbelt rules after fugue's generated rules (repeatable). |
 | `--keep-on-error`         | off      | If the agent exits non-zero, skip the scrub (debugging aid).                         |
 | `--image <ref>`           | `ghcr.io/dotbrains/fugue:latest` | docker: use a specific image.                                  |
 | `-h`, `--help`            | —        | Print usage and exit.                                                                |
@@ -84,6 +85,9 @@ fugue --ephemeral-workspace claude "rewrite the build system"
 
 # an agent that needs your existing host login (native, real $HOME)
 fugue --backend native --share-home auggie "..."
+
+# native backend: add a narrow local Seatbelt rule
+fugue --backend native --append-profile ~/.config/fugue/local.sb codex "..."
 ```
 
 ## Shell wrappers

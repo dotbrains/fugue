@@ -49,8 +49,8 @@ run_native() {
   run bash -c '
     cd "$1" || exit 99
     PATH="$2:$PATH" ANTHROPIC_API_KEY=sk-test FUGUE_DENY_READ="$3" \
-      "$4" --backend native claude
-  ' _ "$WORK" "$BIN" "$SECRET" "$FUGUE"
+      "$4" --backend native "${@:5}" claude
+  ' _ "$WORK" "$BIN" "$SECRET" "$FUGUE" "$@"
 }
 
 @test "native: runs the host agent and allows writes in the project" {
@@ -79,6 +79,37 @@ run_native() {
   [[ "$output" == *"NO_SECRET"* ]]
 }
 
+@test "native: --append-profile can add a narrow read denial" {
+  local append_profile="$WORK/extra.sb"
+  local secret_real
+  secret_real="$(cd "$SECRET" && pwd -P)"
+  printf '(deny file-read* (subpath "%s"))\n' "$secret_real" >"$append_profile"
+
+  run bash -c '
+    cd "$1" || exit 99
+    PATH="$2:$PATH" ANTHROPIC_API_KEY=sk-test \
+      "$3" --backend native --append-profile "$4" claude
+  ' _ "$WORK" "$BIN" "$FUGUE" "$append_profile"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"NO_SECRET"* ]]
+}
+
+@test "native: --append-profile protects the appended profile from writes" {
+  local append_profile="$WORK/protected.sb"
+  printf '(allow file-write* (literal "%s"))\n' "$append_profile" >"$append_profile"
+
+  cat >"$BIN/claude" <<EOF
+#!/usr/bin/env bash
+(printf hacked > "$append_profile" 2>/dev/null && echo "WROTE_PROFILE") || echo "NO_PROFILE_WRITE"
+EOF
+  chmod +x "$BIN/claude"
+
+  run_native --append-profile "$append_profile"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"NO_PROFILE_WRITE"* ]]
+  [[ "$(cat "$append_profile")" != "hacked" ]]
+}
+
 @test "native: --share-home keeps the real \$HOME" {
   run bash -c '
     cd "$1" || exit 99
@@ -96,4 +127,14 @@ run_native() {
     _ "$FUGUE"
   [ "$status" -eq 2 ]
   [[ "$output" == *"installed"* ]]
+}
+
+@test "native: --append-profile is rejected by the docker backend" {
+  local append_profile="$WORK/docker.sb"
+  printf ';; docker-unsupported\n' >"$append_profile"
+
+  run bash -c 'ANTHROPIC_API_KEY=sk-test "$1" --backend docker --append-profile "$2" claude' \
+    _ "$FUGUE" "$append_profile"
+  [ "$status" -eq 2 ]
+  [[ "$output" == *"--append-profile is only supported with --backend native"* ]]
 }

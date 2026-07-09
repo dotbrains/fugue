@@ -32,6 +32,7 @@
 #   --add-dir <path>           also expose <path> read-write inside the sandbox (repeatable)
 #   --ro-dir <path>            also expose <path> read-only inside the sandbox (repeatable)
 #   --share-home               native: keep the real $HOME (for agents that need host login)
+#   --append-profile <path>    native: append a custom Seatbelt profile (repeatable)
 #   --keep-on-error            do not auto-teardown if the agent exits non-zero (debug)
 #   --image <ref>              docker: override the image (default: ghcr.io/dotbrains/fugue)
 #   -h, --help                 this help
@@ -52,6 +53,7 @@ SHARE_HOME=0
 NATIVE_TMP="" # set by run_native; cleaned by its EXIT trap
 declare -a ADD_DIRS_RW=()
 declare -a ADD_DIRS_RO=()
+declare -a APPEND_PROFILES=()
 
 die() {
   printf 'fugue: %s\n' "$*" >&2
@@ -138,6 +140,10 @@ while [[ $# -gt 0 ]]; do
       SHARE_HOME=1
       shift
       ;;
+    --append-profile)
+      APPEND_PROFILES+=("${2:?--append-profile needs a path}")
+      shift 2
+      ;;
     --keep-on-error)
       KEEP_ON_ERROR=1
       shift
@@ -193,6 +199,15 @@ done
 # sandbox matches the canonical (resolved) path, not the symlinked one.
 abspath() { (cd "$1" 2>/dev/null && pwd -P) || die "no such directory: $1"; }
 
+absfile() {
+  local path="$1" dir base
+  [[ -f "$path" ]] || die "no such file: $path"
+  [[ -r "$path" ]] || die "cannot read file: $path"
+  dir="$(cd "$(dirname "$path")" 2>/dev/null && pwd -P)" || die "no such directory: $(dirname "$path")"
+  base="$(basename "$path")"
+  printf '%s/%s\n' "$dir" "$base"
+}
+
 # Shred the native backend's temp tree (ephemeral $HOME, workspace copy, and the
 # generated profile). Invoked indirectly via `trap ... EXIT` in run_native, so
 # its only call site is invisible to static analysis (flagged unused/unreachable).
@@ -211,6 +226,7 @@ scrub_native() {
 # docker backend
 # ============================================================================
 run_docker() {
+  [[ ${#APPEND_PROFILES[@]} -eq 0 ]] || die "--append-profile is only supported with --backend native"
   command -v docker >/dev/null || die "docker not found on PATH"
   [[ ${#CRED_VARS[@]} -gt 0 ]] || die "no API key in env for $AGENT (expected one of: ${API_KEY_VARS:-?})"
 
@@ -397,6 +413,18 @@ SB
   # read-only extra dirs are readable by the broad allow above; nothing to add.
   for d in ${ADD_DIRS_RO[@]+"${ADD_DIRS_RO[@]}"}; do
     : "$(abspath "$d")" # validate it exists; reads already allowed
+  done
+
+  # Custom Seatbelt rules load last so users can add narrowly scoped native
+  # backend policy without editing fugue itself. Protect those profile files
+  # after appending them, so a sandboxed process cannot rewrite its own policy
+  # source if the file lives inside an otherwise-writable project directory.
+  local appended_profile
+  for d in ${APPEND_PROFILES[@]+"${APPEND_PROFILES[@]}"}; do
+    appended_profile="$(absfile "$d")"
+    printf '\n;; --- appended profile: %s ---\n' "$appended_profile"
+    cat "$appended_profile"
+    printf '\n(deny file-write* (literal "%s"))\n' "$appended_profile"
   done
 }
 

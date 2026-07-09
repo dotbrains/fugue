@@ -76,6 +76,23 @@ that's required; do 3–4 only to also bake the agent into the docker image.
 | `FUGUE_DENY_READ`                                        | native: space-separated absolute subpaths to additionally deny reads of, on top of the built-in secret denylist. |
 | `<agent credential vars>`                                | The credential forwarded to the matching agent (per the profile's `API_KEY_VARS`). |
 
+### Native appended profiles
+
+On macOS, `--append-profile <path>` appends a custom Seatbelt profile after
+fugue's generated native-backend rules. Use it for machine-local rules that are
+too specific for fugue itself, such as an extra deny for a local credential
+store or a tool-specific path restriction.
+
+Appended profiles are loaded only by `--backend native`; the docker backend
+rejects the flag. Fugue validates each file is readable, appends profiles in CLI
+order, then emits a final `deny file-write*` rule for each appended profile file
+so a sandboxed process cannot rewrite its own policy source.
+
+Seatbelt denials are not a grant escape hatch: an appended profile cannot reopen
+paths fugue already denies, such as the built-in credential denylist.
+Author appended absolute paths in their physical form (`pwd -P`) so macOS
+symlinks such as `/var` and `/tmp` match Seatbelt's canonical path view.
+
 ### Set inside the container
 
 These are injected by `bin/fugue` and consumed by `src/fugue-entry`; you do not
