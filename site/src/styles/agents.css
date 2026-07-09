@@ -1,0 +1,62 @@
+/* ---------- agents ---------- */
+.agent-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 14px;
+}
+.agent {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  transition:
+    border-color 0.15s,
+    transform 0.15s;
+}
+.agent:hover {
+  border-color: var(--accent-dim);
+  transform: translateY(-2px);
+}
+.agent-top {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.agent-cmd {
+  font-family: var(--mono);
+  color: var(--accent);
+  font-size: 0.98rem;
+}
+
+/* agent icon tile (real logo, or a monogram fallback) */
+.aicon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  background: #15181d;
+  border: 1px solid var(--border);
+  flex: none;
+  line-height: 1;
+  user-select: none;
+}
+.aicon-code {
+  font-family: var(--mono);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+.agent-label {
+  color: var(--text);
+  font-size: 0.9rem;
+}
+.agent-backends {
+  font-family: var(--mono);
+  color: var(--faint);
+  font-size: 0.74rem;
+  margin-top: 2px;
+}
+

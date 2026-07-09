@@ -1,0 +1,29 @@
+/* ---------- footer ---------- */
+.footer {
+  padding: 44px 0;
+  background: var(--bg-alt);
+}
+.footer-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.footer .muted {
+  margin: 10px 0 0;
+  font-size: 0.88rem;
+}
+.footer-links {
+  display: flex;
+  gap: 1.4rem;
+  flex-wrap: wrap;
+  font-size: 0.92rem;
+}
+.footer-links a {
+  color: var(--muted);
+}
+.footer-links a:hover {
+  color: var(--text);
+}
+

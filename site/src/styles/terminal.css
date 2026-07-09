@@ -1,0 +1,88 @@
+/* ---------- terminal ---------- */
+.term {
+  background: var(--panel);
+  border: 1px solid var(--border-2);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: 0 24px 60px -30px rgba(0, 0, 0, 0.8);
+}
+.term-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: var(--panel-2);
+  border-bottom: 1px solid var(--border);
+}
+.dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.dot-r {
+  background: #ec6a5e;
+}
+.dot-y {
+  background: #f4bf4f;
+}
+.dot-g {
+  background: #61c454;
+}
+.term-title {
+  margin-left: 8px;
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: var(--faint);
+}
+.term-body {
+  margin: 0;
+  padding: 18px 18px 20px;
+  font-family: var(--mono);
+  font-size: 0.84rem;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--text);
+}
+.term-body .ln {
+  display: block;
+}
+.term-body .dim {
+  color: var(--faint);
+}
+.term-body .prompt {
+  color: var(--accent);
+  margin-right: 6px;
+}
+/* proof terminal highlighting */
+.term-body .hl-prompt {
+  color: var(--accent);
+}
+.term-body .hl-cmd {
+  color: var(--text);
+}
+.term-body .hl-deny {
+  color: var(--red);
+}
+.term-body .hl-ok {
+  color: var(--green);
+}
+.term-body .hl-comment {
+  color: var(--faint);
+}
+.cursor {
+  display: inline-block;
+  width: 8px;
+  height: 1.05em;
+  background: var(--accent);
+  margin-left: 4px;
+  vertical-align: -2px;
+  animation: blink 1.1s steps(1) infinite;
+}
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+

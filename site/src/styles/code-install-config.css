@@ -1,0 +1,114 @@
+/* ---------- code blocks ---------- */
+.code {
+  position: relative;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin: 0 0 12px;
+  min-width: 0;
+  max-width: 100%;
+}
+.code pre {
+  margin: 0;
+  padding: 16px 18px;
+  overflow-x: auto;
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: #c7cad1;
+}
+.copy {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--muted);
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.2rem 0.55rem;
+  cursor: pointer;
+}
+.copy:hover {
+  color: var(--accent);
+  border-color: var(--accent-dim);
+}
+/* install methods: one per row, text left, full-width command right */
+.install-cards {
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+/* config options: label + icon on the left, a labeled mini terminal on right */
+.config-list {
+  display: grid;
+}
+.config-item {
+  display: grid;
+  grid-template-columns: 320px minmax(0, 1fr);
+  gap: 36px;
+  align-items: center;
+  padding: 28px 0;
+}
+.config-item + .config-item {
+  border-top: 1px solid var(--border);
+}
+.config-ico {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: #15181d;
+  border: 1px solid var(--border);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+  margin-bottom: 14px;
+}
+.config-text h3 {
+  margin: 0 0 8px;
+  font-size: 1.15rem;
+}
+.config-text p {
+  color: var(--muted);
+  margin: 0;
+}
+.config-term.term {
+  background: var(--bg);
+}
+.term-body.small {
+  font-size: 0.8rem;
+  line-height: 1.7;
+  padding: 14px 16px;
+  white-space: pre;
+  overflow-x: auto;
+}
+.card.install {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 24px;
+  align-items: center;
+}
+.install-head h3 {
+  margin: 0 0 6px;
+}
+.install-head .muted {
+  margin: 0;
+  font-size: 0.86rem;
+}
+.card.install .code {
+  margin: 0;
+}
+.usage-title {
+  margin: 34px 0 14px;
+  font-size: 1.1rem;
+}
+.proof .term-body code {
+  background: none;
+  border: none;
+  padding: 0;
+  color: inherit;
+  font-size: inherit;
+}
+

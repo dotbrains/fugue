@@ -1,0 +1,75 @@
+# shellcheck shell=bash
+# ============================================================================
+# docker backend
+# ============================================================================
+run_docker() {
+  [[ ${#APPEND_PROFILES[@]} -eq 0 ]] || die "--append-profile is only supported with --backend native"
+  command -v docker >/dev/null || die "docker not found on PATH"
+  [[ ${#CRED_VARS[@]} -gt 0 ]] || die "no API key in env for $AGENT (expected one of: ${API_KEY_VARS:-?})"
+
+  # The tmpfs/mount specs below carry commas inside single values (rw,exec,...),
+  # which shellcheck misreads as array-element separators (SC2054).
+  # shellcheck disable=SC2054
+  declare -a DOCKER_ARGS=(
+    run --rm -it
+    --hostname fugue
+    # ephemeral $HOME — every agent writes its state/history/transcripts here
+    --tmpfs /home/agent:rw,exec,uid=1001,gid=1001,mode=0700
+    # no new privileges; drop the lot, add back only what egress needs
+    --security-opt no-new-privileges
+    --cap-drop ALL
+    # kill the managed-sandbox trace surfaces if the base image carries them
+    -e FUGUE=1
+    -e HOME=/home/agent
+    -e DISABLE_AUTOUPDATER=1
+    -e DO_NOT_TRACK=1
+  )
+
+  # per-agent telemetry / analytics kill switches (from profile)
+  for kv in "${TELEMETRY_ENV[@]}"; do
+    DOCKER_ARGS+=(-e "$kv")
+  done
+
+  for var in "${CRED_VARS[@]}"; do
+    DOCKER_ARGS+=(-e "$var")
+  done
+
+  # workspace mount
+  if [[ "$EPHEMERAL_WS" -eq 1 ]]; then
+    # copy-on-tmpfs: agent edits a throwaway copy, host cwd is never touched
+    # shellcheck disable=SC2054  # commas live inside the tmpfs spec, not between args
+    DOCKER_ARGS+=(--tmpfs /workspace:rw,exec,mode=0777 -e FUGUE_EPHEMERAL_WS=1)
+  else
+    DOCKER_ARGS+=(-v "$(pwd):/workspace:rw")
+  fi
+  DOCKER_ARGS+=(-w /workspace)
+
+  # extra directories, mounted at their host path inside the container
+  local d real
+  for d in ${ADD_DIRS_RW[@]+"${ADD_DIRS_RW[@]}"}; do
+    real="$(abspath "$d")"
+    DOCKER_ARGS+=(-v "$real:$real:rw")
+  done
+  for d in ${ADD_DIRS_RO[@]+"${ADD_DIRS_RO[@]}"}; do
+    real="$(abspath "$d")"
+    DOCKER_ARGS+=(-v "$real:$real:ro")
+  done
+
+  # egress isolation
+  if [[ "$STRICT" -eq 1 ]]; then
+    DOCKER_ARGS+=(--cap-add NET_ADMIN -e "FUGUE_ALLOW_HOSTS=$API_HOSTS" -e FUGUE_STRICT=1)
+  else
+    DOCKER_ARGS+=(-e FUGUE_STRICT=0)
+  fi
+  [[ "$KEEP_ON_ERROR" -eq 1 ]] && DOCKER_ARGS+=(-e FUGUE_KEEP_ON_ERROR=1)
+
+  printf 'fugue: %s session (docker) — strict=%s ephemeral-ws=%s — no trace will persist\n' \
+    "$AGENT" "$STRICT" "$EPHEMERAL_WS" >&2
+
+  set +e
+  docker "${DOCKER_ARGS[@]}" "$IMAGE" \
+    /usr/local/bin/fugue-entry "$AGENT_CMD" "" "$@"
+  local rc=$?
+  set -e
+  return "$rc"
+}

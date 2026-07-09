@@ -1,0 +1,71 @@
+/* ---------- hero ---------- */
+.hero {
+  padding: 84px 0 64px;
+  border-bottom: 1px solid var(--border);
+}
+.hero-inner {
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 48px;
+  align-items: center;
+}
+.eyebrow {
+  font-family: var(--mono);
+  text-transform: lowercase;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+  font-size: 0.86rem;
+  margin: 0 0 14px;
+}
+.hero h1 {
+  font-size: clamp(2.3rem, 5vw, 3.4rem);
+  margin: 0 0 22px;
+}
+.lede {
+  color: var(--muted);
+  font-size: 1.06rem;
+  max-width: 38ch;
+  margin: 0 0 14px;
+}
+.lede strong {
+  color: var(--text);
+}
+.lede.sub {
+  font-size: 0.98rem;
+}
+.cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 26px;
+}
+.btn {
+  font-family: var(--mono);
+  font-size: 0.92rem;
+  color: var(--text);
+  border: 1px solid var(--border-2);
+  background: var(--panel);
+  padding: 0.7rem 1.2rem;
+  border-radius: 9px;
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    transform 0.05s;
+}
+.btn:hover {
+  border-color: var(--accent);
+  text-decoration: none;
+}
+.btn:active {
+  transform: translateY(1px);
+}
+.btn-primary {
+  background: var(--accent);
+  color: #1a1205;
+  border-color: var(--accent);
+  font-weight: 600;
+}
+.btn-primary:hover {
+  background: #ffc06f;
+}
+

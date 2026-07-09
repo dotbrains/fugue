@@ -1,0 +1,92 @@
+/* ---------- dice demo ---------- */
+.dice-title {
+  font-size: clamp(1.5rem, 3vw, 2.05rem);
+  max-width: 24ch;
+  margin: 0 0 28px;
+}
+.dice {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 40px;
+  align-items: center;
+}
+.dice-left {
+  min-width: 0;
+}
+.term-body.chat {
+  font-size: 0.86rem;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  white-space: normal;
+}
+.crow {
+  display: flex;
+  gap: 12px;
+  align-items: baseline;
+}
+.crow .who {
+  flex: 0 0 48px;
+  font-weight: 700;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+.who.is-you {
+  color: var(--accent);
+}
+.who.is-agent {
+  color: var(--red);
+}
+.crow .msg {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.msg.dim {
+  color: var(--muted);
+}
+.msg.think {
+  color: var(--faint);
+  font-style: italic;
+}
+.msg.cmd {
+  color: var(--red);
+}
+.roll {
+  margin-top: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--mono);
+  font-size: 0.9rem;
+  color: var(--text);
+  background: var(--panel);
+  border: 1px solid var(--border-2);
+  border-radius: 10px;
+  padding: 0.7rem 1.1rem;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+.roll:hover {
+  border-color: var(--accent);
+}
+.roll-die {
+  color: var(--accent);
+  font-size: 1.2rem;
+}
+.dice-right h3 {
+  font-size: 1.35rem;
+  margin: 0 0 14px;
+}
+.deny-chip {
+  font-family: var(--mono);
+  font-size: 0.84rem;
+  color: var(--green);
+  background: color-mix(in srgb, var(--green) 9%, var(--bg));
+  border: 1px solid color-mix(in srgb, var(--green) 30%, var(--border));
+  border-radius: 10px;
+  padding: 0.8rem 1rem;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+

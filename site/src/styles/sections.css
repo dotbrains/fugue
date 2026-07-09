@@ -1,0 +1,166 @@
+/* ---------- sections ---------- */
+.section {
+  padding: 76px 0;
+  border-bottom: 1px solid var(--border);
+}
+.section.alt {
+  background: var(--bg-alt);
+}
+.section h2 {
+  font-size: clamp(1.6rem, 3.2vw, 2.1rem);
+  margin: 0 0 10px;
+}
+.section-lede {
+  color: var(--muted);
+  max-width: 62ch;
+  margin: 0 0 34px;
+}
+
+/* ---------- trace table ---------- */
+.trace {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.trace-head,
+.trace-row {
+  display: grid;
+  grid-template-columns: 1.1fr 1.2fr 1.4fr;
+  gap: 18px;
+  padding: 14px 18px;
+}
+.trace-head {
+  background: var(--panel-2);
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--faint);
+}
+.trace-row {
+  border-top: 1px solid var(--border);
+  font-size: 0.92rem;
+}
+.trace-row:hover {
+  background: var(--panel);
+}
+.trace-surface {
+  color: var(--text);
+  font-weight: 500;
+}
+.trace-normal {
+  color: var(--muted);
+}
+.trace-fugue {
+  color: var(--text);
+}
+
+/* ---------- cards ---------- */
+.cards {
+  display: grid;
+  gap: 20px;
+}
+.cards.two {
+  grid-template-columns: repeat(2, 1fr);
+}
+.cards.three {
+  grid-template-columns: repeat(3, 1fr);
+}
+.card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  /* allow the card to shrink below its content so long code lines scroll
+     inside their <pre> instead of blowing out the grid track */
+  min-width: 0;
+  transition:
+    border-color 0.15s,
+    transform 0.15s;
+}
+.card:hover {
+  border-color: var(--border-2);
+  transform: translateY(-2px);
+}
+.card h3 {
+  margin: 0 0 12px;
+  font-size: 1.1rem;
+}
+.card p {
+  color: var(--muted);
+  margin: 0 0 14px;
+}
+.card-tag {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  color: var(--accent);
+  border: 1px solid var(--accent-dim);
+  border-radius: 6px;
+  padding: 0.15rem 0.55rem;
+  margin-bottom: 14px;
+}
+.card-tagline {
+  color: var(--text) !important;
+  font-size: 1rem;
+}
+.ticks {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 10px;
+}
+.ticks li {
+  position: relative;
+  padding-left: 1.5rem;
+  color: var(--muted);
+  font-size: 0.94rem;
+}
+.ticks li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  color: var(--green);
+}
+.ticks.no li::before {
+  content: "✗";
+  color: var(--red);
+}
+.ok-card {
+  border-color: color-mix(in srgb, var(--green) 35%, var(--border));
+}
+.no-card {
+  border-color: color-mix(in srgb, var(--red) 30%, var(--border));
+}
+.mini {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  overflow-x: auto;
+  color: #c7cad1;
+  margin: 0;
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* ---------- generate-with-LLM ---------- */
+.gen-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+}
+.gen-card p {
+  color: var(--muted);
+  margin: 0 0 18px;
+}
+.gen-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+

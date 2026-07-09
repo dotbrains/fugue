@@ -1,60 +1,8 @@
-import { AgentIcon } from './AgentIcon'
 import { Code } from './Code'
+import { AgentsTable, ExitCodesTable, FlagsTable, ProfileFieldsTable } from './DocsTables'
 import { GhostMark } from './GhostMark'
-import { AGENT_HOSTS, AGENTS, BACKENDS, INSTALL, REPO, USAGE } from './data'
-
-const NAV = [
-  { id: 'overview', label: 'Overview' },
-  { id: 'install', label: 'Install' },
-  { id: 'quickstart', label: 'Quickstart' },
-  { id: 'backends', label: 'Backends' },
-  { id: 'cli', label: 'CLI reference' },
-  { id: 'agents', label: 'Agents' },
-  { id: 'configuration', label: 'Configuration' },
-  { id: 'security', label: 'Security' },
-  { id: 'reference', label: 'Full reference' },
-]
-
-const FLAGS: [string, string][] = [
-  ['--backend <docker|native>', 'Execution backend (default docker; or FUGUE_BACKEND).'],
-  ['--strict', 'docker: hard nftables egress allowlist (default). Fails closed.'],
-  ['--no-net-isolation', 'docker: env-only mode, no firewall. Weaker, portable.'],
-  ['--ephemeral-workspace', 'Run against a throwaway copy of the cwd.'],
-  ['--add-dir <path>', 'Expose a path read-write inside the sandbox (repeatable).'],
-  ['--ro-dir <path>', 'Expose a path read-only inside the sandbox (repeatable).'],
-  ['--share-home', 'native: keep the real $HOME (for agents that need a host login).'],
-  ['--keep-on-error', 'Skip the scrub if the agent exits non-zero (debug).'],
-  ['--image <ref>', 'docker: use a specific image.'],
-  ['-h, --help', 'Print usage and exit.'],
-]
-
-const EXIT_CODES: [string, string][] = [
-  ['0', 'The agent ran and exited successfully.'],
-  ['2', 'Launcher usage error (unknown agent/flag/backend, missing credential).'],
-  ['3', 'docker --strict could not install the egress allowlist; refused to run.'],
-  ['other', "The agent's own exit code, propagated unchanged."],
-]
-
-const PROFILE_FIELDS: [string, string][] = [
-  ['AGENT_CMD', 'The command that runs the agent (e.g. claude).'],
-  ['API_KEY_VARS', 'Host env var(s) holding the credential; the first one set is forwarded.'],
-  ['API_HOSTS', 'Hosts egress may reach under docker --strict (TCP 443). Keep minimal.'],
-  ['TELEMETRY_ENV', 'KEY=VALUE pairs that kill telemetry, analytics, and autoupdate.'],
-  ['BACKENDS', 'Which backends the agent runs under: docker and/or native.'],
-]
-
-const REPO_DOCS: [string, string][] = [
-  ['quickstart.md', 'First no-trace session in minutes.'],
-  ['installation.md', 'Install fugue and the developer toolchain.'],
-  ['usage.md', 'Every flag, agent, and exit code.'],
-  ['configuration.md', 'The profile contract and the FUGUE_* environment.'],
-  ['architecture.md', 'How each backend sandboxes, end to end.'],
-  ['security.md', 'Trust boundaries and the fail-closed contract.'],
-  ['threat-model.md', 'What each backend does and does not defend against.'],
-  ['development.md', 'The quality gate and contributor workflow.'],
-  ['releasing.md', 'How the image is published, and version pinning.'],
-  ['troubleshooting.md', 'Common local and runtime failures.'],
-]
+import { BACKENDS, INSTALL, REPO, USAGE } from './data'
+import { DOCS_NAV, REPO_DOCS } from './docsContent'
 
 function DocsNav() {
   return (
@@ -86,7 +34,7 @@ export default function Docs() {
       <div className="container docs-layout">
         <aside className="docs-side">
           <nav>
-            {NAV.map((n) => (
+            {DOCS_NAV.map((n) => (
               <a key={n.id} href={`#${n.id}`}>
                 {n.label}
               </a>
@@ -159,47 +107,9 @@ export default function Docs() {
             <h2>CLI reference</h2>
             <Code>{'fugue [flags] <agent> [agent args...]\nfugue shellenv [bash|zsh|fish]'}</Code>
             <h3>Flags</h3>
-            <div className="doc-table-wrap">
-            <table className="doc-table">
-              <thead>
-                <tr>
-                  <th>Flag</th>
-                  <th>Effect</th>
-                </tr>
-              </thead>
-              <tbody>
-                {FLAGS.map(([f, d]) => (
-                  <tr key={f}>
-                    <td>
-                      <code>{f}</code>
-                    </td>
-                    <td>{d}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            </div>
+            <FlagsTable />
             <h3>Exit codes</h3>
-            <div className="doc-table-wrap">
-            <table className="doc-table">
-              <thead>
-                <tr>
-                  <th>Code</th>
-                  <th>Meaning</th>
-                </tr>
-              </thead>
-              <tbody>
-                {EXIT_CODES.map(([c, d]) => (
-                  <tr key={c}>
-                    <td>
-                      <code>{c}</code>
-                    </td>
-                    <td>{d}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            </div>
+            <ExitCodesTable />
           </section>
 
           <section id="agents" className="doc-section">
@@ -209,31 +119,7 @@ export default function Docs() {
               runs your host’s installed CLI; the three first-class agents are
               also baked into the docker image.
             </p>
-            <div className="doc-table-wrap">
-            <table className="doc-table">
-              <thead>
-                <tr>
-                  <th>Agent</th>
-                  <th>Backends</th>
-                  <th>API host(s)</th>
-                </tr>
-              </thead>
-              <tbody>
-                {AGENTS.map((a) => (
-                  <tr key={a.name}>
-                    <td>
-                      <span className="doc-agent">
-                        <AgentIcon name={a.name} size={18} />
-                        <code>{a.name}</code>
-                      </span>
-                    </td>
-                    <td>{a.backends}</td>
-                    <td className="doc-hosts">{AGENT_HOSTS[a.name]}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            </div>
+            <AgentsTable />
           </section>
 
           <section id="configuration" className="doc-section">
@@ -243,26 +129,7 @@ export default function Docs() {
               Each agent is one file, <code>profiles/&lt;agent&gt;.env</code>,
               sourced by the launcher:
             </p>
-            <div className="doc-table-wrap">
-            <table className="doc-table">
-              <thead>
-                <tr>
-                  <th>Field</th>
-                  <th>Purpose</th>
-                </tr>
-              </thead>
-              <tbody>
-                {PROFILE_FIELDS.map(([f, d]) => (
-                  <tr key={f}>
-                    <td>
-                      <code>{f}</code>
-                    </td>
-                    <td>{d}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            </div>
+            <ProfileFieldsTable />
             <h3>Environment</h3>
             <p>
               <code>FUGUE_BACKEND</code> sets the default backend.{' '}

@@ -28,7 +28,8 @@ behaving. Your changes must preserve that.
 ## Code map
 
 ```text
-bin/fugue          host launcher: flags, profile, + two backends (docker run / sandbox-exec)
+bin/fugue          host launcher: flags, profile, backend dispatch
+bin/lib/fugue-*    backend implementations (docker run / sandbox-exec)
 src/fugue-entry    docker entrypoint: nftables allowlist, scrub trap, drop privs
 profiles/*.env     per-agent: AGENT_CMD, API_KEY_VARS, API_HOSTS, TELEMETRY_ENV, BACKENDS
 Dockerfile         node:22-slim + nftables/su-exec + the 3 image agents, unprivileged user

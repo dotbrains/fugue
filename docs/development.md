@@ -6,7 +6,8 @@ profiles, and a Dockerfile. The quality gate keeps them honest.
 ## Code organization
 
 ```text
-bin/fugue          # host-side launcher: flags, profile, docker run assembly
+bin/fugue          # host-side launcher: flags, profile, backend dispatch
+bin/lib/fugue-*    # backend implementations (docker run / sandbox-exec)
 src/fugue-entry    # container-side entrypoint: firewall, scrub, privilege drop
 profiles/*.env     # per-agent contract (AGENT_CMD, API_KEY_VARS, API_HOSTS, TELEMETRY_ENV)
 Dockerfile         # the minimal no-trace runtime image
