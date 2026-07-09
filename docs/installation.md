@@ -85,6 +85,19 @@ they are never written to disk and never shared across agents.
 
 ## Developer toolchain (optional)
 
+The easiest path is the checked-in Flox environment:
+
+```sh
+flox activate -- make check
+```
+
+`make check:mermaid` uses Puppeteer's browser cache. If Mermaid reports a
+missing `chrome-headless-shell`, install it once from inside Flox:
+
+```sh
+flox activate -- bash -lc 'npx puppeteer browsers install chrome-headless-shell@131.0.6778.85'
+```
+
 The quality gate (`make check`) uses these tools. Install only what you plan to
 run locally — CI installs them itself.
 
@@ -94,6 +107,9 @@ run locally — CI installs them itself.
 | [shfmt](https://github.com/mvdan/sh)                | shell formatting                 | `brew install shfmt`    |
 | [hadolint](https://github.com/hadolint/hadolint)    | Dockerfile linting               | `brew install hadolint` |
 | [bats](https://github.com/bats-core/bats-core)      | shell test runner                | `brew install bats-core` |
+| [Node.js / npm](https://nodejs.org/)                 | site build and docs tooling      | `brew install node`     |
+| [markdownlint-cli2](https://github.com/DavidAnson/markdownlint-cli2) | Markdown linting | `npm install -g markdownlint-cli2` |
+| [mermaid-cli](https://github.com/mermaid-js/mermaid-cli) | Mermaid diagram validation    | `npm install -g @mermaid-js/mermaid-cli` |
 | [actionlint](https://github.com/rhysd/actionlint)   | workflow YAML linting            | `brew install actionlint` |
 | [gitleaks](https://github.com/gitleaks/gitleaks)    | secret scanning                  | `brew install gitleaks` |
 

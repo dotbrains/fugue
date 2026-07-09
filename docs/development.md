@@ -32,7 +32,10 @@ Each gate is also a standalone target:
 | `make check:lint`       | shellcheck | the scripts (`-x`) and the profiles                  |
 | `make check:dockerfile` | hadolint   | the Dockerfile (config in `.hadolint.yaml`)          |
 | `make check:tests`      | bats       | `test/*.bats`                                         |
+| `make check:markdown`   | markdownlint-cli2 | Markdown docs                                  |
+| `make check:mermaid`    | mmdc       | Mermaid diagrams in docs                             |
 | `make check:build`      | docker     | the image builds                                     |
+| `make check:site`       | npm        | type-check and build the docs site                   |
 | `make check:actions`    | actionlint | the workflow YAML (config in `.github/actionlint.yaml`) |
 | `make check:secrets`    | gitleaks   | no secrets are committed                             |
 
@@ -61,13 +64,14 @@ make check:format SHFMT=/path/to/shfmt
 
 ## CI
 
-Three workflows mirror the local gate and ship the image:
+Three workflows cover validation, scheduled security scanning, and releases:
 
-- [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) — a `shell` job
-  (format, lint, dockerfile, tests), a `docs` job (markdown, mermaid), and an
-  `image build` job.
-- [`.github/workflows/code-scanning.yml`](../.github/workflows/code-scanning.yml)
-  — `actionlint` and `gitleaks`, plus a weekly schedule.
+- [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) — one `quality
+  gate` job for PRs and pushes. It installs the toolchain once, then runs the
+  same `make check:*` targets used locally, including workflow lint, current-tree
+  secret scanning, the image build, and the site build.
+- [`.github/workflows/security.yml`](../.github/workflows/security.yml) — a
+  weekly and manual full-history gitleaks scan.
 - [`.github/workflows/release.yml`](../.github/workflows/release.yml) — builds
   and publishes the multi-arch image to GHCR on a `v*` tag. See
   [releasing.md](releasing.md).

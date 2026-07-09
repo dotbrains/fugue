@@ -13,29 +13,46 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  SHFMT_VERSION: "3.10.0"
+  HADOLINT_VERSION: "2.12.0"
+  GITLEAKS_VERSION: "8.21.2"
+
 jobs:
-  shell:
-    name: shell (format, lint, dockerfile, tests)
+  quality:
+    name: quality gate
     # Runs on a self-hosted Blacksmith runner; GitHub-hosted runners
     # (ubuntu-latest) are unavailable on this org's billing plan.
     runs-on: blacksmith-4vcpu-ubuntu-2404
-    timeout-minutes: 15
-    env:
-      SHFMT_VERSION: "3.10.0"
-      HADOLINT_VERSION: "2.12.0"
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v7
 
-      - name: Install the shell toolchain
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+
+      - name: Install the quality toolchain
         run: |
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends shellcheck bats
+          sudo apt-get install -y --no-install-recommends \
+            shellcheck bats \
+            libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 \
+            libxkbcommon0 libxcomposite1 libxdamage1 libxfixes3 libxrandr2 \
+            libgbm1 libasound2t64 libpango-1.0-0 libcairo2 libatspi2.0-0
           curl -fsSL -o shfmt \
             "https://github.com/mvdan/sh/releases/download/v${SHFMT_VERSION}/shfmt_v${SHFMT_VERSION}_linux_amd64"
           curl -fsSL -o hadolint \
             "https://github.com/hadolint/hadolint/releases/download/v${HADOLINT_VERSION}/hadolint-Linux-x86_64"
-          chmod +x shfmt hadolint
-          sudo mv shfmt hadolint /usr/local/bin/
+          curl -fsSL -o gitleaks.tar.gz \
+            "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          tar -xzf gitleaks.tar.gz gitleaks
+          bash <(curl -fsSL https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
+          chmod +x shfmt hadolint gitleaks actionlint
+          sudo mv shfmt hadolint gitleaks actionlint /usr/local/bin/
+          npm install -g markdownlint-cli2 @mermaid-js/mermaid-cli
 
       - name: Verify formatting
         run: make check:format
@@ -49,43 +66,20 @@ jobs:
       - name: Run the test suite
         run: make check:tests
 
-  docs:
-    name: docs (markdown, mermaid)
-    # Same Blacksmith runner as the shell job (see note above).
-    runs-on: blacksmith-4vcpu-ubuntu-2404
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@v7
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: "22"
-
-      - name: Install the docs toolchain
-        # mermaid-cli pulls a headless Chromium via its puppeteer postinstall.
-        run: npm install -g markdownlint-cli2 @mermaid-js/mermaid-cli
-
-      - name: Install Chromium runtime libraries
-        # mermaid-cli's bundled Chromium needs these shared libs to launch.
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends \
-            libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 \
-            libxkbcommon0 libxcomposite1 libxdamage1 libxfixes3 libxrandr2 \
-            libgbm1 libasound2t64 libpango-1.0-0 libcairo2 libatspi2.0-0
-
       - name: Lint markdown
         run: make check:markdown
 
       - name: Validate mermaid diagrams
         run: make check:mermaid
 
-  build:
-    name: image build
-    # Same Blacksmith runner as the shell job (see note above).
-    runs-on: blacksmith-4vcpu-ubuntu-2404
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v7
       - name: Build the fugue image
         run: make check:build
+
+      - name: Lint workflow YAML
+        run: make check:actions
+
+      - name: Scan current tree for secrets
+        run: make check:secrets
+
+      - name: Build the site
+        run: make check:site

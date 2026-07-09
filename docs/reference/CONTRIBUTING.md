@@ -53,6 +53,7 @@ make check:tests      # bats
 make check:build      # build the image
 make check:markdown   # markdownlint
 make check:mermaid    # validate mermaid diagrams
+make check:site       # type-check and build the site
 make check:actions    # actionlint
 make check:secrets    # gitleaks
 ```

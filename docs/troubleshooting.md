@@ -56,4 +56,9 @@ export FUGUE_IMAGE=ghcr.io/dotbrains/fugue:<tag>   # or set it globally
 | `check:lint`    | shellcheck finding.                                 | Fix it, or scope a narrow disable with a comment ([development.md](development.md)). |
 | `check:dockerfile` | A new hadolint finding outside the ignored pin rules. | Address it, or extend `.hadolint.yaml` with justification. |
 | `check:tests`   | A launcher or profile-contract regression.          | Run `bats test/` locally and read the failing assertion. |
+| `check:markdown` | Markdown style drift.                              | Run `make check:markdown` and fix the reported file. |
+| `check:mermaid` | A Mermaid diagram does not render.                  | Avoid semicolons and angle brackets in diagram text, then rerun `make check:mermaid`. |
 | `check:build`   | The image doesn't build (e.g. a CLI package moved). | Build locally and read the Docker output. |
+| `check:actions` | Workflow YAML or runner-label config is invalid.    | Run `make check:actions` and fix the reported workflow line. |
+| `check:secrets` | A committed file looks like a secret.               | Remove the secret, rotate it if real, and rerun `make check:secrets`. |
+| `check:site`    | The docs site fails type-check or bundle.           | Run `make check:site` and fix the TypeScript or Vite error. |

@@ -12,6 +12,7 @@ BATS         ?= bats
 DOCKER       ?= docker
 MARKDOWNLINT ?= markdownlint-cli2
 MMDC         ?= mmdc
+NPM          ?= npm
 
 # Shell sources, split by how they're invoked:
 #   SCRIPTS  — executable entrypoints and helpers (have shebangs)
@@ -27,7 +28,7 @@ IMAGE ?= ghcr.io/dotbrains/fugue:latest
 
 .PHONY: help check fmt \
         check\:format check\:lint check\:dockerfile check\:tests check\:build \
-        check\:markdown check\:mermaid check\:actions check\:secrets
+        check\:markdown check\:mermaid check\:site check\:actions check\:secrets
 
 help:
 	@echo "fugue make targets:"
@@ -40,12 +41,23 @@ help:
 	@echo "  make check:build      build the container image"
 	@echo "  make check:markdown   markdownlint the docs"
 	@echo "  make check:mermaid    validate the mermaid diagrams"
+	@echo "  make check:site       type-check and build the docs site"
 	@echo "  make check:actions    actionlint the workflow YAML"
 	@echo "  make check:secrets    gitleaks secret scan"
 
-# The aggregate gate, mirroring the CI job order.
-check: check\:format check\:lint check\:dockerfile check\:tests \
-       check\:markdown check\:mermaid check\:build
+# The aggregate gate, mirroring the CI job order. Invoke the colon-named targets
+# recursively so both GNU Make and BSD Make handle the target names consistently.
+check:
+	$(MAKE) check:format
+	$(MAKE) check:lint
+	$(MAKE) check:dockerfile
+	$(MAKE) check:tests
+	$(MAKE) check:markdown
+	$(MAKE) check:mermaid
+	$(MAKE) check:build
+	$(MAKE) check:actions
+	$(MAKE) check:secrets
+	$(MAKE) check:site
 
 fmt:
 	$(SHFMT) $(SHFMT_FLAGS) -w $(SHELL_SRC)
@@ -69,10 +81,12 @@ check\:markdown:
 check\:mermaid:
 	MMDC="$(MMDC)" bash scripts/check-mermaid.sh
 
+check\:site:
+	cd site && $(NPM) ci && $(NPM) run build
+
 check\:build:
 	$(DOCKER) build -t $(IMAGE) .
 
-# Run by the code-scanning workflow rather than the main `check` aggregate.
 check\:actions:
 	$(ACTIONLINT) -color
 

@@ -3,7 +3,7 @@
 # fugue
 
 [![CI](https://github.com/dotbrains/fugue/actions/workflows/ci.yml/badge.svg)](https://github.com/dotbrains/fugue/actions/workflows/ci.yml)
-[![code-scanning](https://github.com/dotbrains/fugue/actions/workflows/code-scanning.yml/badge.svg)](https://github.com/dotbrains/fugue/actions/workflows/code-scanning.yml)
+[![security](https://github.com/dotbrains/fugue/actions/workflows/security.yml/badge.svg)](https://github.com/dotbrains/fugue/actions/workflows/security.yml)
 [![Release](https://img.shields.io/github/v/release/dotbrains/fugue?logo=github&color=blue)](https://github.com/dotbrains/fugue/releases)
 [![License](https://img.shields.io/badge/License-PolyForm_Shield_1.0-blue)](LICENSE)
 

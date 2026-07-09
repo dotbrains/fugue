@@ -13,6 +13,18 @@ updates:
         patterns:
           - "*"
 
+  # Docs site dependencies.
+  - package-ecosystem: npm
+    directory: "/site"
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: ci
+    groups:
+      site:
+        patterns:
+          - "*"
+
   # The Dockerfile base image (the digest-pinned FROM line). Stay on the chosen
   # Node LTS major (22): take patch/minor and digest bumps, but a new major is a
   # deliberate, tested migration — not an automatic PR.
@@ -26,7 +38,7 @@ updates:
       - dependency-name: "node"
         update-types: ["version-update:semver-major"]
 
-  # Versions of the actions used in the CI, code-scanning, and release workflows.
+  # Versions of the actions used in the CI, security, and release workflows.
   - package-ecosystem: github-actions
     directory: "/"
     schedule:

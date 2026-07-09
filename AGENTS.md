@@ -82,6 +82,7 @@ make check:tests      # bats             (test/)
 make check:markdown   # markdownlint-cli2 (docs)
 make check:mermaid    # render every mermaid diagram (catches syntax errors)
 make check:build      # docker build     (image)
+make check:site       # npm build        (site)
 make check:actions    # actionlint       (workflow YAML)
 make check:secrets    # gitleaks         (no committed secrets)
 ```
