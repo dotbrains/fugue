@@ -1,0 +1,99 @@
+# shellcheck shell=bash
+# This helper mutates launcher globals that are consumed after it returns.
+# shellcheck disable=SC2034
+parse_flags() {
+  PARSED_FLAG_COUNT=0
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --backend)
+        BACKEND="${2:?--backend needs a value}"
+        shift 2
+        PARSED_FLAG_COUNT=$((PARSED_FLAG_COUNT + 2))
+        ;;
+      --strict)
+        STRICT=1
+        shift
+        PARSED_FLAG_COUNT=$((PARSED_FLAG_COUNT + 1))
+        ;;
+      --no-net-isolation)
+        STRICT=0
+        shift
+        PARSED_FLAG_COUNT=$((PARSED_FLAG_COUNT + 1))
+        ;;
+      --ephemeral-workspace)
+        EPHEMERAL_WS=1
+        shift
+        PARSED_FLAG_COUNT=$((PARSED_FLAG_COUNT + 1))
+        ;;
+      --add-dir)
+        ADD_DIRS_RW+=("${2:?--add-dir needs a path}")
+        shift 2
+        PARSED_FLAG_COUNT=$((PARSED_FLAG_COUNT + 2))
+        ;;
+      --ro-dir)
+        ADD_DIRS_RO+=("${2:?--ro-dir needs a path}")
+        shift 2
+        PARSED_FLAG_COUNT=$((PARSED_FLAG_COUNT + 2))
+        ;;
+      --share-home)
+        SHARE_HOME=1
+        shift
+        PARSED_FLAG_COUNT=$((PARSED_FLAG_COUNT + 1))
+        ;;
+      --append-profile)
+        APPEND_PROFILES+=("${2:?--append-profile needs a path}")
+        shift 2
+        PARSED_FLAG_COUNT=$((PARSED_FLAG_COUNT + 2))
+        ;;
+      --keep-on-error)
+        KEEP_ON_ERROR=1
+        shift
+        PARSED_FLAG_COUNT=$((PARSED_FLAG_COUNT + 1))
+        ;;
+      --image)
+        IMAGE="${2:?--image needs a value}"
+        shift 2
+        PARSED_FLAG_COUNT=$((PARSED_FLAG_COUNT + 2))
+        ;;
+      -h | --help) usage ;;
+      --)
+        shift
+        PARSED_FLAG_COUNT=$((PARSED_FLAG_COUNT + 1))
+        break
+        ;;
+      -*) die "unknown flag: $1" ;;
+      *) break ;;
+    esac
+  done
+
+  case "$BACKEND" in
+    docker | native) ;;
+    *) die "unknown backend '$BACKEND' (use: docker | native)" ;;
+  esac
+}
+
+load_profile() {
+  AGENT="${1:-}"
+  [[ -n "$AGENT" ]] || die "no agent given. try: fugue claude \"...\"  (see --help)"
+  shift || true
+
+  PROFILE="$FUGUE_ROOT/profiles/$AGENT.env"
+  [[ -f "$PROFILE" ]] || die "unknown agent '$AGENT' (no profile at $PROFILE). known: $(known_agents)"
+
+  # shellcheck source=/dev/null
+  source "$PROFILE"
+
+  BACKENDS="${BACKENDS:-docker}"
+  case " $BACKENDS " in
+    *" $BACKEND "*) ;;
+    *) die "agent '$AGENT' does not support the '$BACKEND' backend (supports: $BACKENDS). try --backend ${BACKENDS%% *}" ;;
+  esac
+}
+
+collect_credentials() {
+  CRED_VARS=()
+  local var
+  for var in ${API_KEY_VARS:-}; do
+    [[ -n "${!var:-}" ]] && CRED_VARS+=("$var")
+  done
+}

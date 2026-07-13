@@ -7,17 +7,6 @@
 [![Release](https://img.shields.io/github/v/release/dotbrains/fugue?logo=github&color=blue)](https://github.com/dotbrains/fugue/releases)
 [![License](https://img.shields.io/badge/License-PolyForm_Shield_1.0-blue)](LICENSE)
 
-[![Bash](https://img.shields.io/badge/Bash-4%2B-4EAA25?logo=gnubash&logoColor=white)](https://www.gnu.org/software/bash/)
-[![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
-[![sandbox-exec](https://img.shields.io/badge/macOS-sandbox--exec-000000?logo=apple&logoColor=white)](https://developer.apple.com/)
-[![ShellCheck](https://img.shields.io/badge/ShellCheck-clean-89e051)](https://www.shellcheck.net/)
-[![shfmt](https://img.shields.io/badge/shfmt-formatted-7F52FF)](https://github.com/mvdan/sh)
-[![hadolint](https://img.shields.io/badge/hadolint-clean-2496ED)](https://github.com/hadolint/hadolint)
-[![Bats](https://img.shields.io/badge/tested_with-bats-22A6F2)](https://github.com/bats-core/bats-core)
-[![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black)](https://react.dev/)
-[![Vite](https://img.shields.io/badge/Vite-6-646CFF?logo=vite&logoColor=white)](https://vite.dev/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-
 > Incognito mode for AI coding agents — Claude, Codex, Gemini, and a dozen more.
 
 A *fugue state* is dissociative amnesia: you act, then keep no memory of having

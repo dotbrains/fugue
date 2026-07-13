@@ -1,0 +1,57 @@
+# shellcheck shell=bash
+# Emit the Seatbelt (SBPL) profile. Model: allow reads broadly so toolchains
+# work, but deny reads of a sensitive set; deny *writes* everywhere except the
+# project, the ephemeral $HOME, temp, and any --add-dir paths. Last match wins.
+native_profile() {
+  local real_home="$1" workdir="$2" run_home="$3" d real
+  cat <<SB
+(version 1)
+(allow default)
+
+;; --- writes: deny everywhere, then re-allow the project and scratch areas ---
+(deny file-write*)
+(allow file-write* (subpath "$workdir"))
+(allow file-write* (subpath "$run_home"))
+(allow file-write* (subpath "/private/tmp"))
+(allow file-write* (subpath "/private/var/tmp"))
+(allow file-write* (subpath "/private/var/folders"))
+(allow file-write* (subpath "/dev"))
+SB
+  for d in ${ADD_DIRS_RW[@]+"${ADD_DIRS_RW[@]}"}; do
+    real="$(abspath "$d")"
+    printf '(allow file-write* (subpath "%s"))\n' "$real"
+  done
+
+  cat <<SB
+
+;; --- reads: deny secrets and credential stores (kernel-enforced) ---
+(deny file-read* (subpath "$real_home/.ssh"))
+(deny file-read* (subpath "$real_home/.aws"))
+(deny file-read* (subpath "$real_home/.gnupg"))
+(deny file-read* (subpath "$real_home/.config/gh"))
+(deny file-read* (subpath "$real_home/.config/gcloud"))
+(deny file-read* (subpath "$real_home/.kube"))
+(deny file-read* (subpath "$real_home/.docker"))
+(deny file-read* (subpath "$real_home/Library/Keychains"))
+(deny file-read* (literal "$real_home/.netrc"))
+(deny file-read* (literal "$real_home/.npmrc"))
+(deny file-read* (literal "$real_home/.pypirc"))
+SB
+
+  for d in ${FUGUE_DENY_READ:-}; do
+    real="$(cd "$d" 2>/dev/null && pwd -P || echo "$d")"
+    printf '(deny file-read* (subpath "%s"))\n' "$real"
+  done
+
+  for d in ${ADD_DIRS_RO[@]+"${ADD_DIRS_RO[@]}"}; do
+    : "$(abspath "$d")"
+  done
+
+  local appended_profile
+  for d in ${APPEND_PROFILES[@]+"${APPEND_PROFILES[@]}"}; do
+    appended_profile="$(absfile "$d")"
+    printf '\n;; --- appended profile: %s ---\n' "$appended_profile"
+    cat "$appended_profile"
+    printf '\n(deny file-write* (literal "%s"))\n' "$appended_profile"
+  done
+}

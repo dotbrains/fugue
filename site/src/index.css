@@ -3,11 +3,16 @@
 @import './styles/hero.css';
 @import './styles/terminal.css';
 @import './styles/sections.css';
+@import './styles/trace.css';
+@import './styles/cards.css';
 @import './styles/agents.css';
 @import './styles/code-install-config.css';
+@import './styles/generate.css';
 @import './styles/dice.css';
 @import './styles/policy-builder.css';
 @import './styles/policy-builder-form.css';
+@import './styles/policy-builder-agent-select.css';
+@import './styles/policy-builder-controls.css';
 @import './styles/policy-builder-output.css';
 @import './styles/docs.css';
 @import './styles/footer.css';

@@ -1,0 +1,17 @@
+.gen-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+}
+
+.gen-card p {
+  color: var(--muted);
+  margin: 0 0 18px;
+}
+
+.gen-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}

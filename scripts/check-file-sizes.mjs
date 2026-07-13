@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-import { readFileSync } from 'node:fs'
+import { basename } from 'node:path'
+import { readFileSync, statSync } from 'node:fs'
 import { spawnSync } from 'node:child_process'
 
 const budgetPath = process.argv[2] ?? 'scripts/file-size-budgets.json'
@@ -46,7 +47,9 @@ function gitLsFiles() {
 function shouldCheck(file) {
   if (excludedPathPatterns.some((pattern) => pattern.test(file))) return false
   if (file === 'Dockerfile' || file === 'Makefile') return true
-  return checkedSuffixes.has(file.slice(file.lastIndexOf('.')))
+  const name = basename(file)
+  if (!name.includes('.')) return (statSync(file).mode & 0o111) !== 0
+  return checkedSuffixes.has(name.slice(name.lastIndexOf('.')))
 }
 
 const failures = []

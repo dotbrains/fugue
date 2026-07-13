@@ -67,6 +67,8 @@ usage() {
 
 # shellcheck source=bin/lib/fugue-shellenv
 source "$FUGUE_ROOT/bin/lib/fugue-shellenv"
+# shellcheck source=bin/lib/fugue-cli
+source "$FUGUE_ROOT/bin/lib/fugue-cli"
 
 if [[ "${1:-}" == "shellenv" ]]; then
   shift
@@ -74,90 +76,11 @@ if [[ "${1:-}" == "shellenv" ]]; then
   exit 0
 fi
 
-# --- parse flags (stop at the agent name) -----------------------------------
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --backend)
-      BACKEND="${2:?--backend needs a value}"
-      shift 2
-      ;;
-    --strict)
-      STRICT=1
-      shift
-      ;;
-    --no-net-isolation)
-      STRICT=0
-      shift
-      ;;
-    --ephemeral-workspace)
-      EPHEMERAL_WS=1
-      shift
-      ;;
-    --add-dir)
-      ADD_DIRS_RW+=("${2:?--add-dir needs a path}")
-      shift 2
-      ;;
-    --ro-dir)
-      ADD_DIRS_RO+=("${2:?--ro-dir needs a path}")
-      shift 2
-      ;;
-    --share-home)
-      SHARE_HOME=1
-      shift
-      ;;
-    --append-profile)
-      APPEND_PROFILES+=("${2:?--append-profile needs a path}")
-      shift 2
-      ;;
-    --keep-on-error)
-      KEEP_ON_ERROR=1
-      shift
-      ;;
-    --image)
-      IMAGE="${2:?--image needs a value}"
-      shift 2
-      ;;
-    -h | --help) usage ;;
-    --)
-      shift
-      break
-      ;;
-    -*) die "unknown flag: $1" ;;
-    *) break ;;
-  esac
-done
-
-case "$BACKEND" in
-  docker | native) ;;
-  *) die "unknown backend '$BACKEND' (use: docker | native)" ;;
-esac
-
-AGENT="${1:-}"
-[[ -n "$AGENT" ]] || die "no agent given. try: fugue claude \"...\"  (see --help)"
-shift || true
-
-PROFILE="$FUGUE_ROOT/profiles/$AGENT.env"
-[[ -f "$PROFILE" ]] || die "unknown agent '$AGENT' (no profile at $PROFILE). known: $(known_agents)"
-
-# --- load the agent profile --------------------------------------------------
-# Profiles export: AGENT_CMD, API_KEY_VARS, API_HOSTS, TELEMETRY_ENV (array),
-# and BACKENDS (space-separated list of supported backends).
-# shellcheck source=/dev/null
-source "$PROFILE"
-
-# Backend support is declared per profile; default to docker if a profile
-# predates the field.
-BACKENDS="${BACKENDS:-docker}"
-case " $BACKENDS " in
-  *" $BACKEND "*) ;;
-  *) die "agent '$AGENT' does not support the '$BACKEND' backend (supports: $BACKENDS). try --backend ${BACKENDS%% *}" ;;
-esac
-
-# Forward exactly the credential(s) this agent needs, nothing else.
-declare -a CRED_VARS=()
-for var in ${API_KEY_VARS:-}; do
-  [[ -n "${!var:-}" ]] && CRED_VARS+=("$var")
-done
+parse_flags "$@"
+shift "$PARSED_FLAG_COUNT"
+load_profile "$@"
+shift
+collect_credentials
 
 # Resolve a directory to its absolute, *physical* path. `pwd -P` matters on
 # macOS, where /var, /tmp, /etc are symlinks to /private/... and the Seatbelt
