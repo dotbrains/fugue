@@ -1,5 +1,5 @@
-import { Code } from './Code'
-import { BACKENDS, INSTALL, USAGE } from './data'
+import { Code } from '../Code'
+import { BACKENDS, INSTALL, USAGE } from '../data'
 
 export function OverviewSection() {
   return (

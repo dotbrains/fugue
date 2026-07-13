@@ -8,7 +8,7 @@ import {
   QuickstartSection,
   ReferenceSection,
   SecuritySection,
-} from './DocsSections'
+} from './docs/DocsSections'
 import { GhostMark } from './GhostMark'
 import { REPO } from './data'
 import { DOCS_NAV } from './docsContent'

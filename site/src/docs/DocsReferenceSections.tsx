@@ -1,7 +1,7 @@
-import { Code } from './Code'
-import { AgentsTable, ExitCodesTable, FlagsTable, ProfileFieldsTable } from './DocsTables'
-import { REPO } from './data'
-import { REPO_DOCS } from './docsContent'
+import { Code } from '../Code'
+import { AgentsTable, ExitCodesTable, FlagsTable, ProfileFieldsTable } from '../DocsTables'
+import { REPO } from '../data'
+import { REPO_DOCS } from '../docsContent'
 
 export function CliSection() {
   return (
