@@ -52,6 +52,28 @@ SB
 (deny file-read* (literal "$real_home_sb/.netrc"))
 (deny file-read* (literal "$real_home_sb/.npmrc"))
 (deny file-read* (literal "$real_home_sb/.pypirc"))
+
+;; --- local daemon sockets: keep credential/container daemons opt-in ---
+(deny file-read*
+  (literal "/var/run/docker.sock")
+  (literal "/private/var/run/docker.sock")
+  (literal "/var/run/podman/podman.sock")
+  (literal "/private/var/run/podman/podman.sock")
+  (literal "$real_home_sb/.docker/run/docker.sock")
+  (literal "$real_home_sb/.rd/docker.sock")
+  (literal "$real_home_sb/.orbstack/run/docker.sock"))
+(deny network-outbound
+  (remote unix-socket (path-literal "/var/run/docker.sock"))
+  (remote unix-socket (path-literal "/private/var/run/docker.sock"))
+  (remote unix-socket (path-literal "/var/run/podman/podman.sock"))
+  (remote unix-socket (path-literal "/private/var/run/podman/podman.sock"))
+  (remote unix-socket (path-literal "$real_home_sb/.docker/run/docker.sock"))
+  (remote unix-socket (path-literal "$real_home_sb/.rd/docker.sock"))
+  (remote unix-socket (path-literal "$real_home_sb/.orbstack/run/docker.sock"))
+  (remote unix-socket (path-regex #"^/private/tmp/com\.apple\.launchd\.[^/]+/Listeners$"))
+  (remote unix-socket (path-regex #"^/tmp/com\.apple\.launchd\.[^/]+/Listeners$"))
+  (remote unix-socket (path-regex #"^/private/var/run/com\.apple\.launchd\.[^/]+/Listeners$"))
+  (remote unix-socket (path-regex #"^/var/run/com\.apple\.launchd\.[^/]+/Listeners$")))
 SB
 
   for d in ${FUGUE_DENY_READ:-}; do

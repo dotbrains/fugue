@@ -69,9 +69,9 @@ What this means concretely — the native backend does **not** defend against:
   only the project directory is ever mounted.)
 - **Process or kernel-level isolation.** There is no container: the agent shares
   your host kernel, PID and network namespaces, and can see host processes and
-  talk to local services (e.g. `127.0.0.1`). Seatbelt restricts file operations,
-  not the rest of the host surface. There is no `--cap-drop`/`no-new-privileges`
-  equivalent.
+  talk to local services (e.g. `127.0.0.1`). Fugue blocks known SSH-agent and
+  container-daemon UNIX sockets by default, but there is no `--cap-drop` or
+  `no-new-privileges` equivalent.
 - **In-memory ephemerality.** The ephemeral `$HOME` is a `mktemp -d` directory
   shredded with `rm` on exit, not a tmpfs — its contents touch disk and are not
   securely erased, so they are recoverable in principle. The agent can also write

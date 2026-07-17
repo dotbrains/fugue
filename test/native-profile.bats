@@ -40,3 +40,13 @@ absfile() {
   [ "$status" -eq 2 ]
   [[ "$output" == *"invalid SBPL string"* ]]
 }
+
+@test "native profile denies common credential and daemon sockets" {
+  local profile
+  profile="$(native_profile /tmp/home /tmp/work /tmp/run '' '')"
+
+  [[ "$profile" == *'(remote unix-socket (path-literal "/var/run/docker.sock"))'* ]]
+  [[ "$profile" == *'(remote unix-socket (path-literal "/tmp/home/.docker/run/docker.sock"))'* ]]
+  [[ "$profile" == *'(remote unix-socket (path-literal "/private/var/run/podman/podman.sock"))'* ]]
+  [[ "$profile" == *'(remote unix-socket (path-regex #"^/private/var/run/com\.apple\.launchd\.[^/]+/Listeners$"))'* ]]
+}

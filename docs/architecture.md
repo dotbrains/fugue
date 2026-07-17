@@ -66,10 +66,9 @@ What it provides vs. the docker backend:
 - **Environment**: started from a clean `env -i` plus a small safe passthrough,
   the telemetry kill-env, and the single credential — so other host secrets in
   your environment don't leak to the agent.
-- **Network**: *not* host-allowlisted. sandbox-exec can't pin egress to specific
-  hosts the way nftables does, so native trades the network leash for
-  zero-dependency on-host execution. Use the docker backend when you need the
-  hard egress allowlist.
+- **Network**: *not* host-allowlisted. sandbox-exec can't pin egress the way
+  nftables does. Known SSH-agent and container-daemon UNIX sockets are denied by
+  default, but use docker when you need a hard egress allowlist.
 
 Extra read denials can be added via `FUGUE_DENY_READ` (space-separated absolute
 subpaths). Machine-local Seatbelt rules can be appended with
