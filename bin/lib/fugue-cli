@@ -3,6 +3,7 @@
 # shellcheck disable=SC2034
 parse_flags() {
   PARSED_FLAG_COUNT=0
+  [[ -n "${FUGUE_ENV_PASS:-}" ]] && append_env_pass "$FUGUE_ENV_PASS"
   while [[ $# -gt 0 ]]; do
     case "$1" in
       --backend)
@@ -55,6 +56,11 @@ parse_flags() {
         shift
         PARSED_FLAG_COUNT=$((PARSED_FLAG_COUNT + 1))
         ;;
+      --env-pass)
+        append_env_pass "${2:?--env-pass needs a comma-separated name list}"
+        shift 2
+        PARSED_FLAG_COUNT=$((PARSED_FLAG_COUNT + 2))
+        ;;
       --keep-on-error)
         KEEP_ON_ERROR=1
         shift
@@ -80,6 +86,16 @@ parse_flags() {
     docker | native) ;;
     *) die "unknown backend '$BACKEND' (use: docker | native)" ;;
   esac
+}
+
+append_env_pass() {
+  local csv="$1" var
+  local -a vars=()
+  IFS=, read -r -a vars <<<"$csv"
+  for var in "${vars[@]}"; do
+    [[ "$var" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]] || die "invalid env var name in --env-pass: $var"
+    ENV_PASS_VARS+=("$var")
+  done
 }
 
 load_profile() {

@@ -35,6 +35,7 @@
 #   --share-home               native: keep the real $HOME (for agents that need host login)
 #   --append-profile <path>    native: append a custom Seatbelt profile (repeatable)
 #   --trust-workdir-config     native: load .fugue from cwd (ro-dir/add-dir/append-profile)
+#   --env-pass <names>         pass comma-separated host env vars into the agent
 #   --keep-on-error            do not auto-teardown if the agent exits non-zero (debug)
 #   --image <ref>              docker: override the image (default: ghcr.io/dotbrains/fugue)
 #   -h, --help                 this help
@@ -60,6 +61,7 @@ NATIVE_TMP="" # set by run_native; cleaned by its EXIT trap
 declare -a ADD_DIRS_RW=()
 declare -a ADD_DIRS_RO=()
 declare -a APPEND_PROFILES=()
+declare -a ENV_PASS_VARS=()
 
 die() {
   printf 'fugue: %s\n' "$*" >&2

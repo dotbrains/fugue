@@ -87,6 +87,9 @@ run_native() {
   done
   for kv in "${TELEMETRY_ENV[@]}"; do env_args+=("$kv"); done
   for var in "${CRED_VARS[@]}"; do env_args+=("$var=${!var}"); done
+  for var in "${ENV_PASS_VARS[@]}"; do
+    [[ -n "${!var:-}" ]] && env_args+=("$var=${!var}")
+  done
 
   set +e
   (cd "$workdir" && env -i "${env_args[@]}" \

@@ -78,6 +78,7 @@ that's required; do 3–4 only to also bake the agent into the docker image.
 | `FUGUE_RO_DIRS`                                          | Colon-separated extra read-only directories, equivalent to repeated `--ro-dir`. |
 | `FUGUE_ADD_DIRS`                                         | Colon-separated extra read-write directories, equivalent to repeated `--add-dir`. |
 | `FUGUE_APPEND_PROFILES`                                  | native: colon-separated Seatbelt profiles, equivalent to repeated `--append-profile`. |
+| `FUGUE_ENV_PASS`                                         | Comma-separated host env var names to pass through, equivalent to `--env-pass`. |
 | `FUGUE_TRUST_WORKDIR_CONFIG`                             | native: truthy/falsey default for loading `.fugue` from the current directory. |
 | `<agent credential vars>`                                | The credential forwarded to the matching agent (per the profile's `API_KEY_VARS`). |
 

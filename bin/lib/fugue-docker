@@ -33,6 +33,9 @@ run_docker() {
   for var in "${CRED_VARS[@]}"; do
     DOCKER_ARGS+=(-e "$var")
   done
+  for var in "${ENV_PASS_VARS[@]}"; do
+    [[ -n "${!var:-}" ]] && DOCKER_ARGS+=(-e "$var")
+  done
 
   # workspace mount
   if [[ "$EPHEMERAL_WS" -eq 1 ]]; then

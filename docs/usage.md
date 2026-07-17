@@ -63,6 +63,7 @@ a brand-new agent is just a new profile ([configuration.md](configuration.md#add
 | `--share-home`            | off      | native: keep the real `$HOME` (for agents that need your host login) instead of an ephemeral one. |
 | `--append-profile <path>` | —        | native: append custom Seatbelt rules after fugue's generated rules (repeatable). |
 | `--trust-workdir-config`  | off      | native: load `.fugue` from the current directory (`ro-dir`, `add-dir`, `append-profile`). |
+| `--env-pass <names>`      | —        | Pass comma-separated host environment variable names into the agent.               |
 | `--keep-on-error`         | off      | If the agent exits non-zero, skip the scrub (debugging aid).                         |
 | `--image <ref>`           | `ghcr.io/dotbrains/fugue:latest` | docker: use a specific image.                                  |
 | `-h`, `--help`            | —        | Print usage and exit.                                                                |
