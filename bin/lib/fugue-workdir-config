@@ -13,6 +13,16 @@ resolve_workdir_config_path() {
   WORKDIR_CONFIG_PATH="$(pwd -P)/.fugue"
 }
 
+append_colon_paths() {
+  local target_array="$1" raw_paths="$2" config_dir="$3" raw_path
+  local -a paths=()
+  [[ -n "$raw_paths" ]] || return 0
+  IFS=: read -r -a paths <<<"$raw_paths"
+  for raw_path in "${paths[@]}"; do
+    append_config_path "$target_array" "$raw_path" "$config_dir"
+  done
+}
+
 append_config_path() {
   local target_array="$1" raw_path="$2" config_dir="$3" resolved_path
   [[ -n "$raw_path" ]] || die "empty path in $WORKDIR_CONFIG_PATH"
@@ -28,6 +38,11 @@ append_config_path() {
     rw) ADD_DIRS_RW+=("$resolved_path") ;;
     profile) APPEND_PROFILES+=("$resolved_path") ;;
   esac
+}
+
+load_env_grants() {
+  append_colon_paths ro "${FUGUE_RO_DIRS:-}" "$(pwd -P)"
+  append_colon_paths rw "${FUGUE_ADD_DIRS:-}" "$(pwd -P)"
 }
 
 load_workdir_config() {
@@ -56,8 +71,8 @@ load_workdir_config() {
     value="${value#"${value%%[![:space:]]*}"}"
     value="${value%"${value##*[![:space:]]}"}"
     case "$key" in
-      ro-dir | ro_dir | add-dirs-ro | add_dirs_ro) append_config_path ro "$value" "$config_dir" ;;
-      add-dir | add_dir | add-dirs | add_dirs) append_config_path rw "$value" "$config_dir" ;;
+      ro-dir | ro_dir | add-dirs-ro | add_dirs_ro) append_colon_paths ro "$value" "$config_dir" ;;
+      add-dir | add_dir | add-dirs | add_dirs) append_colon_paths rw "$value" "$config_dir" ;;
       append-profile | append_profile) append_config_path profile "$value" "$config_dir" ;;
       *) die "invalid workdir config key '$key' (use: ro-dir, add-dir, append-profile)" ;;
     esac

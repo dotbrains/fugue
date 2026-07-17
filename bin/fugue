@@ -83,6 +83,7 @@ fi
 
 parse_flags "$@"
 shift "$PARSED_FLAG_COUNT"
+load_env_grants
 load_workdir_config
 load_profile "$@"
 shift

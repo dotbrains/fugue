@@ -56,6 +56,25 @@ EOF
   [[ "$(cat "$WORK/.fugue")" != "hacked" ]]
 }
 
+@test "native: FUGUE_ADD_DIRS grants writable extra directories" {
+  local EXTRA="$TMP/extra"
+  mkdir -p "$EXTRA"
+  cat >"$BIN/claude" <<EOF
+#!/usr/bin/env bash
+(printf ok > "$EXTRA/wrote" 2>/dev/null && echo "WROTE_EXTRA") || echo "NO_EXTRA"
+EOF
+  chmod +x "$BIN/claude"
+
+  run bash -c '
+    cd "$1" || exit 99
+    PATH="$2:$PATH" ANTHROPIC_API_KEY=sk-test FUGUE_ADD_DIRS="$4" "$3" --backend native claude
+  ' _ "$WORK" "$BIN" "$FUGUE" "$EXTRA"
+
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"WROTE_EXTRA"* ]]
+  [[ "$(cat "$EXTRA/wrote")" == "ok" ]]
+}
+
 @test "trusted workdir config is native-only" {
   run bash -c '
     cd "$1" || exit 99
