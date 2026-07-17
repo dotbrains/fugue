@@ -2,16 +2,28 @@
 # Emit the Seatbelt (SBPL) profile. Model: allow reads broadly so toolchains
 # work, but deny reads of a sensitive set; deny *writes* everywhere except the
 # project, the ephemeral $HOME, temp, and any --add-dir paths. Last match wins.
+sb_escape() {
+  local value="$1"
+  [[ "$value" != *[$'\001'-$'\037'$'\177']* ]] || die "invalid SBPL string: contains control characters"
+  value="${value//\\/\\\\}"
+  value="${value//\"/\\\"}"
+  printf '%s' "$value"
+}
+
 native_profile() {
   local real_home="$1" workdir="$2" run_home="$3" git_common_dir="$4" workdir_config_path="$5" d real
+  local real_home_sb workdir_sb run_home_sb git_common_dir_sb
+  real_home_sb="$(sb_escape "$real_home")"
+  workdir_sb="$(sb_escape "$workdir")"
+  run_home_sb="$(sb_escape "$run_home")"
   cat <<SB
 (version 1)
 (allow default)
 
 ;; --- writes: deny everywhere, then re-allow the project and scratch areas ---
 (deny file-write*)
-(allow file-write* (subpath "$workdir"))
-(allow file-write* (subpath "$run_home"))
+(allow file-write* (subpath "$workdir_sb"))
+(allow file-write* (subpath "$run_home_sb"))
 (allow file-write* (subpath "/private/tmp"))
 (allow file-write* (subpath "/private/var/tmp"))
 (allow file-write* (subpath "/private/var/folders"))
@@ -19,26 +31,27 @@ native_profile() {
 SB
   for d in ${ADD_DIRS_RW[@]+"${ADD_DIRS_RW[@]}"}; do
     real="$(abspath "$d")"
-    printf '(allow file-write* (subpath "%s"))\n' "$real"
+    printf '(allow file-write* (subpath "%s"))\n' "$(sb_escape "$real")"
   done
   if [[ -n "$git_common_dir" && "$git_common_dir" != "$workdir" && "$git_common_dir" != "$workdir"/* ]]; then
-    printf '(allow file-write* (subpath "%s"))\n' "$git_common_dir"
+    git_common_dir_sb="$(sb_escape "$git_common_dir")"
+    printf '(allow file-write* (subpath "%s"))\n' "$git_common_dir_sb"
   fi
 
   cat <<SB
 
 ;; --- reads: deny secrets and credential stores (kernel-enforced) ---
-(deny file-read* (subpath "$real_home/.ssh"))
-(deny file-read* (subpath "$real_home/.aws"))
-(deny file-read* (subpath "$real_home/.gnupg"))
-(deny file-read* (subpath "$real_home/.config/gh"))
-(deny file-read* (subpath "$real_home/.config/gcloud"))
-(deny file-read* (subpath "$real_home/.kube"))
-(deny file-read* (subpath "$real_home/.docker"))
-(deny file-read* (subpath "$real_home/Library/Keychains"))
-(deny file-read* (literal "$real_home/.netrc"))
-(deny file-read* (literal "$real_home/.npmrc"))
-(deny file-read* (literal "$real_home/.pypirc"))
+(deny file-read* (subpath "$real_home_sb/.ssh"))
+(deny file-read* (subpath "$real_home_sb/.aws"))
+(deny file-read* (subpath "$real_home_sb/.gnupg"))
+(deny file-read* (subpath "$real_home_sb/.config/gh"))
+(deny file-read* (subpath "$real_home_sb/.config/gcloud"))
+(deny file-read* (subpath "$real_home_sb/.kube"))
+(deny file-read* (subpath "$real_home_sb/.docker"))
+(deny file-read* (subpath "$real_home_sb/Library/Keychains"))
+(deny file-read* (literal "$real_home_sb/.netrc"))
+(deny file-read* (literal "$real_home_sb/.npmrc"))
+(deny file-read* (literal "$real_home_sb/.pypirc"))
 SB
 
   for d in ${FUGUE_DENY_READ:-}; do
@@ -47,7 +60,7 @@ SB
     else
       real="$(expand_user_path "$d")"
     fi
-    printf '(deny file-read* (subpath "%s"))\n' "$real"
+    printf '(deny file-read* (subpath "%s"))\n' "$(sb_escape "$real")"
   done
 
   for d in ${ADD_DIRS_RO[@]+"${ADD_DIRS_RO[@]}"}; do
@@ -59,9 +72,9 @@ SB
     appended_profile="$(absfile "$d")"
     printf '\n;; --- appended profile: %s ---\n' "$appended_profile"
     cat "$appended_profile"
-    printf '\n(deny file-write* (literal "%s"))\n' "$appended_profile"
+    printf '\n(deny file-write* (literal "%s"))\n' "$(sb_escape "$appended_profile")"
   done
   if [[ -n "$workdir_config_path" && -e "$workdir_config_path" ]]; then
-    printf '\n(deny file-write* (literal "%s"))\n' "$(absfile "$workdir_config_path")"
+    printf '\n(deny file-write* (literal "%s"))\n' "$(sb_escape "$(absfile "$workdir_config_path")")"
   fi
 }
