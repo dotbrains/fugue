@@ -95,6 +95,26 @@ EOF
   [[ "$(cat "$extra/wrote")" == "ok" ]]
 }
 
+@test "native: FUGUE_APPEND_PROFILES appends local policy" {
+  local profile="$WORK/env-deny.sb"
+  local secret_real
+  secret_real="$(cd "$SECRET" && pwd -P)"
+  printf '(deny file-read* (subpath "%s"))\n' "$secret_real" >"$profile"
+  cat >"$BIN/claude" <<EOF
+#!/usr/bin/env bash
+(cat "$SECRET/key" >/dev/null 2>&1 && echo "READ_SECRET") || echo "NO_SECRET"
+EOF
+  chmod +x "$BIN/claude"
+
+  run bash -c '
+    cd "$1" || exit 99
+    PATH="$2:$PATH" ANTHROPIC_API_KEY=sk-test FUGUE_APPEND_PROFILES="$4" "$3" --backend native claude
+  ' _ "$WORK" "$BIN" "$FUGUE" "$profile"
+
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"NO_SECRET"* ]]
+}
+
 @test "trusted workdir config is native-only" {
   run bash -c '
     cd "$1" || exit 99

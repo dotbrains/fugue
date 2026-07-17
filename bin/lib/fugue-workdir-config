@@ -43,6 +43,7 @@ append_config_path() {
 load_env_grants() {
   append_colon_paths ro "${FUGUE_RO_DIRS:-}" "$(pwd -P)"
   append_colon_paths rw "${FUGUE_ADD_DIRS:-}" "$(pwd -P)"
+  append_colon_paths profile "${FUGUE_APPEND_PROFILES:-}" "$(pwd -P)"
 }
 
 load_workdir_config() {
