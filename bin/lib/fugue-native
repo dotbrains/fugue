@@ -16,6 +16,17 @@ scrub_native() {
   rm -rf "$NATIVE_TMP"
 }
 
+native_git_common_dir() {
+  local workdir="$1" common_dir
+  command -v git >/dev/null || return 0
+  common_dir="$(git -C "$workdir" rev-parse --git-common-dir 2>/dev/null)" || return 0
+  case "$common_dir" in
+    /*) ;;
+    *) common_dir="$workdir/$common_dir" ;;
+  esac
+  (cd "$common_dir" 2>/dev/null && pwd -P) || return 0
+}
+
 # ============================================================================
 # native backend (macOS sandbox-exec / Seatbelt)
 # ============================================================================
@@ -27,7 +38,7 @@ run_native() {
     die "no API key in env for $AGENT (expected one of: ${API_KEY_VARS:-?}); or pass --share-home to use your host login"
   fi
 
-  local real_home workdir run_home tmproot profile
+  local real_home workdir run_home tmproot profile git_common_dir
   real_home="$(abspath "$HOME")"
   tmproot="$(mktemp -d "${TMPDIR:-/tmp}/fugue.XXXXXX")"
   NATIVE_TMP="$tmproot" # visible to the EXIT trap after this function returns
@@ -42,6 +53,8 @@ run_native() {
     workdir="$(pwd -P)"
   fi
 
+  git_common_dir="$(native_git_common_dir "$workdir")"
+
   # $HOME: ephemeral by default (no-trace); the real home only with --share-home
   if [[ "$SHARE_HOME" -eq 1 ]]; then
     run_home="$real_home"
@@ -51,7 +64,7 @@ run_native() {
   fi
 
   profile="$tmproot/fugue.sb"
-  native_profile "$real_home" "$workdir" "$run_home" >"$profile"
+  native_profile "$real_home" "$workdir" "$run_home" "$git_common_dir" >"$profile"
 
   trap scrub_native EXIT
 

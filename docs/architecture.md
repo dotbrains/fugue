@@ -57,10 +57,10 @@ flowchart TD
 
 What it provides vs. the docker backend:
 
-- **File system**: writes are denied outside the project / scratch areas, and
-  reads of a sensitive denylist (SSH keys, cloud creds, keychains) are blocked by
-  the kernel. Toolchain reads still work (read is allow-by-default minus the
-  denylist).
+- **File system**: writes are denied outside the project / scratch areas,
+  including linked worktree Git metadata, and reads of a sensitive denylist (SSH
+  keys, cloud creds, keychains) are blocked by the kernel. Toolchain reads still
+  work (read is allow-by-default minus the denylist).
 - **`$HOME`**: ephemeral by default (shredded on exit); `--share-home` keeps the
   real one for agents that need an existing login.
 - **Environment**: started from a clean `env -i` plus a small safe passthrough,
