@@ -34,3 +34,26 @@ EOF
   [[ "$output" == *"SAW_ALLOWED"* ]]
   [[ "$output" == *"NO_BLOCKED"* ]]
 }
+
+@test "native: preserves safe developer environment variables" {
+  cat >"$BIN/claude" <<'EOF'
+#!/usr/bin/env bash
+[[ "${SDKROOT:-}" == "/tmp/sdk" ]] && echo "SAW_SDKROOT"
+[[ "${EDITOR:-}" == "vim" ]] && echo "SAW_EDITOR"
+[[ "${VISUAL:-}" == "code --wait" ]] && echo "SAW_VISUAL"
+[[ -z "${FUGUE_TEST_BLOCKED:-}" ]] && echo "NO_BLOCKED"
+EOF
+  chmod +x "$BIN/claude"
+
+  run bash -c '
+    cd "$1" || exit 99
+    PATH="$2:$PATH" ANTHROPIC_API_KEY=sk-test SDKROOT=/tmp/sdk EDITOR=vim VISUAL="code --wait" FUGUE_TEST_BLOCKED=blocked \
+      "$3" --backend native claude
+  ' _ "$WORK" "$BIN" "$FUGUE"
+
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"SAW_SDKROOT"* ]]
+  [[ "$output" == *"SAW_EDITOR"* ]]
+  [[ "$output" == *"SAW_VISUAL"* ]]
+  [[ "$output" == *"NO_BLOCKED"* ]]
+}

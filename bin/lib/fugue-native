@@ -89,12 +89,12 @@ run_native() {
   )
   local passvar
   for passvar in TERM LANG LC_ALL LC_CTYPE TMPDIR SSL_CERT_FILE SSL_CERT_DIR \
-    HTTP_PROXY HTTPS_PROXY NO_PROXY; do
+    HTTP_PROXY HTTPS_PROXY NO_PROXY SDKROOT EDITOR VISUAL; do
     [[ -n "${!passvar:-}" ]] && env_args+=("$passvar=${!passvar}")
   done
-  for kv in "${TELEMETRY_ENV[@]}"; do env_args+=("$kv"); done
-  for var in "${CRED_VARS[@]}"; do env_args+=("$var=${!var}"); done
-  for var in "${ENV_PASS_VARS[@]}"; do
+  for kv in ${TELEMETRY_ENV[@]+"${TELEMETRY_ENV[@]}"}; do env_args+=("$kv"); done
+  for var in ${CRED_VARS[@]+"${CRED_VARS[@]}"}; do env_args+=("$var=${!var}"); done
+  for var in ${ENV_PASS_VARS[@]+"${ENV_PASS_VARS[@]}"}; do
     [[ -n "${!var:-}" ]] && env_args+=("$var=${!var}")
   done
 
