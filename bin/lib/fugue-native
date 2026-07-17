@@ -33,8 +33,10 @@ native_git_common_dir() {
 run_native() {
   [[ "$(uname -s)" == "Darwin" ]] || die "the native backend requires macOS (sandbox-exec). use --backend docker"
   command -v sandbox-exec >/dev/null || die "sandbox-exec not found (macOS only)"
-  command -v "$AGENT_CMD" >/dev/null || die "native backend needs '$AGENT_CMD' installed on your host (it is not on PATH)"
-  if [[ ${#CRED_VARS[@]} -eq 0 && "$SHARE_HOME" -eq 0 ]]; then
+  if [[ "$PRINT_NATIVE_PROFILE" -eq 0 ]]; then
+    command -v "$AGENT_CMD" >/dev/null || die "native backend needs '$AGENT_CMD' installed on your host (it is not on PATH)"
+  fi
+  if [[ "$PRINT_NATIVE_PROFILE" -eq 0 && ${#CRED_VARS[@]} -eq 0 && "$SHARE_HOME" -eq 0 ]]; then
     die "no API key in env for $AGENT (expected one of: ${API_KEY_VARS:-?}); or pass --share-home to use your host login"
   fi
 
@@ -67,6 +69,11 @@ run_native() {
   native_profile "$real_home" "$workdir" "$run_home" "$git_common_dir" "${WORKDIR_CONFIG_PATH:-}" >"$profile"
 
   trap scrub_native EXIT
+
+  if [[ "$PRINT_NATIVE_PROFILE" -eq 1 ]]; then
+    cat "$profile"
+    return 0
+  fi
 
   printf 'fugue: %s session (native/sandbox-exec) — ephemeral-ws=%s share-home=%s — writes leashed to the project\n' \
     "$AGENT" "$EPHEMERAL_WS" "$SHARE_HOME" >&2

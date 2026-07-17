@@ -64,6 +64,7 @@ a brand-new agent is just a new profile ([configuration.md](configuration.md#add
 | `--append-profile <path>` | —        | native: append custom Seatbelt rules after fugue's generated rules (repeatable). |
 | `--trust-workdir-config`  | off      | native: load `.fugue` from the current directory (`ro-dir`, `add-dir`, `append-profile`). |
 | `--env-pass <names>`      | —        | Pass comma-separated host environment variable names into the agent.               |
+| `--print-native-profile`  | off      | native: print the generated Seatbelt profile and exit without starting the agent. |
 | `--keep-on-error`         | off      | If the agent exits non-zero, skip the scrub (debugging aid).                         |
 | `--image <ref>`           | `ghcr.io/dotbrains/fugue:latest` | docker: use a specific image.                                  |
 | `-h`, `--help`            | —        | Print usage and exit.                                                                |
@@ -95,8 +96,9 @@ fugue --backend native --share-home auggie "..."
 # native backend: add a narrow local Seatbelt rule
 fugue --backend native --append-profile ~/.config/fugue/local.sb codex "..."
 
-# native backend: trust this repo's .fugue path/profile grants for this run
+# native backend: trust this repo's .fugue grants, or inspect the generated policy
 fugue --backend native --trust-workdir-config codex "..."
+fugue --backend native --print-native-profile claude
 ```
 
 ## Shell wrappers

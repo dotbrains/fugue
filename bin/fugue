@@ -36,6 +36,7 @@
 #   --append-profile <path>    native: append a custom Seatbelt profile (repeatable)
 #   --trust-workdir-config     native: load .fugue from cwd (ro-dir/add-dir/append-profile)
 #   --env-pass <names>         pass comma-separated host env vars into the agent
+#   --print-native-profile     native: print the generated Seatbelt profile and exit
 #   --keep-on-error            do not auto-teardown if the agent exits non-zero (debug)
 #   --image <ref>              docker: override the image (default: ghcr.io/dotbrains/fugue)
 #   -h, --help                 this help
@@ -54,6 +55,7 @@ EPHEMERAL_WS=0
 KEEP_ON_ERROR=0
 SHARE_HOME=0
 TRUST_WORKDIR_CONFIG=0
+PRINT_NATIVE_PROFILE=0
 WORKDIR_INPUT="${FUGUE_WORKDIR:-}"
 WORKDIR_PATH=""
 WORKDIR_CONFIG_PATH=""
@@ -93,7 +95,9 @@ load_env_grants
 load_workdir_config
 load_profile "$@"
 shift
-collect_credentials
+if [[ "$PRINT_NATIVE_PROFILE" -eq 0 ]]; then
+  collect_credentials
+fi
 
 # Resolve a directory to its absolute, *physical* path. `pwd -P` matters on
 # macOS, where /var, /tmp, /etc are symlinks to /private/... and the Seatbelt

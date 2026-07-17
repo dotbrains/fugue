@@ -4,6 +4,7 @@
 # ============================================================================
 run_docker() {
   [[ ${#APPEND_PROFILES[@]} -eq 0 ]] || die "--append-profile is only supported with --backend native"
+  [[ "$PRINT_NATIVE_PROFILE" -eq 0 ]] || die "--print-native-profile is only supported with --backend native"
   command -v docker >/dev/null || die "docker not found on PATH"
   [[ ${#CRED_VARS[@]} -gt 0 ]] || die "no API key in env for $AGENT (expected one of: ${API_KEY_VARS:-?})"
 
