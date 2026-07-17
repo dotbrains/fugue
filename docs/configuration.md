@@ -74,7 +74,24 @@ that's required; do 3–4 only to also bake the agent into the docker image.
 | `FUGUE_BACKEND`                                          | Default backend (`docker` or `native`). `--backend` takes precedence. |
 | `FUGUE_IMAGE`                                            | docker: override the default image (`ghcr.io/dotbrains/fugue:latest`). `--image` takes precedence. |
 | `FUGUE_DENY_READ`                                        | native: space-separated absolute subpaths to additionally deny reads of, on top of the built-in secret denylist. |
+| `FUGUE_TRUST_WORKDIR_CONFIG`                             | native: truthy/falsey default for loading `.fugue` from the current directory. |
 | `<agent credential vars>`                                | The credential forwarded to the matching agent (per the profile's `API_KEY_VARS`). |
+
+### Native workdir config
+
+With `--backend native --trust-workdir-config`, fugue loads `.fugue` from the
+current directory before launching the agent. Supported keys are:
+
+```text
+ro-dir=../shared-readonly
+add-dir=../shared-writable
+append-profile=local-deny.sb
+```
+
+Relative paths resolve from the `.fugue` file's directory. Config-provided
+profiles use the same Seatbelt append path as `--append-profile`, and fugue emits
+a final write denial for the loaded `.fugue` file so the sandboxed process cannot
+change its own future grants. The docker backend rejects trusted workdir config.
 
 ### Native appended profiles
 

@@ -64,7 +64,7 @@ run_native() {
   fi
 
   profile="$tmproot/fugue.sb"
-  native_profile "$real_home" "$workdir" "$run_home" "$git_common_dir" >"$profile"
+  native_profile "$real_home" "$workdir" "$run_home" "$git_common_dir" "${WORKDIR_CONFIG_PATH:-}" >"$profile"
 
   trap scrub_native EXIT
 

@@ -33,6 +33,7 @@
 #   --ro-dir <path>            also expose <path> read-only inside the sandbox (repeatable)
 #   --share-home               native: keep the real $HOME (for agents that need host login)
 #   --append-profile <path>    native: append a custom Seatbelt profile (repeatable)
+#   --trust-workdir-config     native: load .fugue from cwd (ro-dir/add-dir/append-profile)
 #   --keep-on-error            do not auto-teardown if the agent exits non-zero (debug)
 #   --image <ref>              docker: override the image (default: ghcr.io/dotbrains/fugue)
 #   -h, --help                 this help
@@ -50,6 +51,8 @@ STRICT=1
 EPHEMERAL_WS=0
 KEEP_ON_ERROR=0
 SHARE_HOME=0
+TRUST_WORKDIR_CONFIG=0
+WORKDIR_CONFIG_PATH=""
 NATIVE_TMP="" # set by run_native; cleaned by its EXIT trap
 declare -a ADD_DIRS_RW=()
 declare -a ADD_DIRS_RO=()
@@ -69,6 +72,8 @@ usage() {
 source "$FUGUE_ROOT/bin/lib/fugue-shellenv"
 # shellcheck source=bin/lib/fugue-cli
 source "$FUGUE_ROOT/bin/lib/fugue-cli"
+# shellcheck source=bin/lib/fugue-workdir-config
+source "$FUGUE_ROOT/bin/lib/fugue-workdir-config"
 
 if [[ "${1:-}" == "shellenv" ]]; then
   shift
@@ -78,6 +83,7 @@ fi
 
 parse_flags "$@"
 shift "$PARSED_FLAG_COUNT"
+load_workdir_config
 load_profile "$@"
 shift
 collect_credentials

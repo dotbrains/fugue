@@ -45,6 +45,11 @@ parse_flags() {
         shift 2
         PARSED_FLAG_COUNT=$((PARSED_FLAG_COUNT + 2))
         ;;
+      --trust-workdir-config)
+        TRUST_WORKDIR_CONFIG=1
+        shift
+        PARSED_FLAG_COUNT=$((PARSED_FLAG_COUNT + 1))
+        ;;
       --keep-on-error)
         KEEP_ON_ERROR=1
         shift

@@ -3,7 +3,7 @@
 # work, but deny reads of a sensitive set; deny *writes* everywhere except the
 # project, the ephemeral $HOME, temp, and any --add-dir paths. Last match wins.
 native_profile() {
-  local real_home="$1" workdir="$2" run_home="$3" git_common_dir="$4" d real
+  local real_home="$1" workdir="$2" run_home="$3" git_common_dir="$4" workdir_config_path="$5" d real
   cat <<SB
 (version 1)
 (allow default)
@@ -57,4 +57,7 @@ SB
     cat "$appended_profile"
     printf '\n(deny file-write* (literal "%s"))\n' "$appended_profile"
   done
+  if [[ -n "$workdir_config_path" && -e "$workdir_config_path" ]]; then
+    printf '\n(deny file-write* (literal "%s"))\n' "$(absfile "$workdir_config_path")"
+  fi
 }
