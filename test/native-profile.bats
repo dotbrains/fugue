@@ -10,7 +10,7 @@ setup() {
 
 die() {
   printf 'fugue: %s\n' "$*" >&2
-  return 2
+  exit 2
 }
 
 expand_user_path() {
