@@ -40,7 +40,7 @@ run_docker() {
     # shellcheck disable=SC2054  # commas live inside the tmpfs spec, not between args
     DOCKER_ARGS+=(--tmpfs /workspace:rw,exec,mode=0777 -e FUGUE_EPHEMERAL_WS=1)
   else
-    DOCKER_ARGS+=(-v "$(pwd):/workspace:rw")
+    DOCKER_ARGS+=(-v "$WORKDIR_PATH:/workspace:rw")
   fi
   DOCKER_ARGS+=(-w /workspace)
 

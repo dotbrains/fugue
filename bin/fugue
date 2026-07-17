@@ -29,6 +29,7 @@
 #   --strict                   docker: hard egress allowlist (default; needs NET_ADMIN)
 #   --no-net-isolation         docker: env-only mode, no firewall (weaker, portable)
 #   --ephemeral-workspace      run against a throwaway copy of the cwd; host tree untouched
+#   --workdir <path>           use <path> as the sandbox workspace (default: cwd)
 #   --add-dir <path>           also expose <path> read-write inside the sandbox (repeatable)
 #   --ro-dir <path>            also expose <path> read-only inside the sandbox (repeatable)
 #   --share-home               native: keep the real $HOME (for agents that need host login)
@@ -52,6 +53,8 @@ EPHEMERAL_WS=0
 KEEP_ON_ERROR=0
 SHARE_HOME=0
 TRUST_WORKDIR_CONFIG=0
+WORKDIR_INPUT="${FUGUE_WORKDIR:-}"
+WORKDIR_PATH=""
 WORKDIR_CONFIG_PATH=""
 NATIVE_TMP="" # set by run_native; cleaned by its EXIT trap
 declare -a ADD_DIRS_RW=()
@@ -83,6 +86,7 @@ fi
 
 parse_flags "$@"
 shift "$PARSED_FLAG_COUNT"
+resolve_workdir
 load_env_grants
 load_workdir_config
 load_profile "$@"

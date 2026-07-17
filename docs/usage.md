@@ -57,6 +57,7 @@ a brand-new agent is just a new profile ([configuration.md](configuration.md#add
 | `--strict`                | on       | docker: hard egress allowlist via nftables. Needs `NET_ADMIN`; **fails closed** if it can't install. |
 | `--no-net-isolation`      | off      | docker: env-only mode, no firewall. Telemetry kill-env still applies. Portable, weaker. |
 | `--ephemeral-workspace`   | off      | Run against a throwaway copy of the cwd; the host tree is untouched.                 |
+| `--workdir <path>`        | cwd      | Use `<path>` as the sandbox workspace.                                               |
 | `--add-dir <path>`        | —        | Also expose `<path>` **read-write** inside the sandbox (repeatable).                 |
 | `--ro-dir <path>`         | —        | Also expose `<path>` **read-only** inside the sandbox (repeatable).                  |
 | `--share-home`            | off      | native: keep the real `$HOME` (for agents that need your host login) instead of an ephemeral one. |
@@ -83,6 +84,9 @@ fugue --ro-dir ~/.cache/go-build --backend native aider "..."
 
 # risky migration against a disposable copy of the working tree
 fugue --ephemeral-workspace claude "rewrite the build system"
+
+# launch from anywhere, but sandbox a specific project
+fugue --workdir ~/src/app --backend native codex "summarize this repo"
 
 # an agent that needs your existing host login (native, real $HOME)
 fugue --backend native --share-home auggie "..."

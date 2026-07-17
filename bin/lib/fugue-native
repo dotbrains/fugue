@@ -47,10 +47,10 @@ run_native() {
   # Canonicalize so the SBPL allow-rule matches the sandbox's resolved path.
   if [[ "$EPHEMERAL_WS" -eq 1 ]]; then
     mkdir -p "$tmproot/workspace"
-    cp -R "$(pwd)/." "$tmproot/workspace/" 2>/dev/null || true
+    cp -R "$WORKDIR_PATH/." "$tmproot/workspace/" 2>/dev/null || true
     workdir="$(abspath "$tmproot/workspace")"
   else
-    workdir="$(pwd -P)"
+    workdir="$WORKDIR_PATH"
   fi
 
   git_common_dir="$(native_git_common_dir "$workdir")"

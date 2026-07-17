@@ -9,8 +9,30 @@ trust_workdir_config_from_env() {
   esac
 }
 
+resolve_config_path_value() {
+  local raw_path="$1" config_dir="$2"
+  [[ -n "$raw_path" ]] || die "empty path in ${WORKDIR_CONFIG_PATH:-workdir config}"
+  case "$raw_path" in
+    "~") printf '%s\n' "$HOME" ;;
+    \~/*) printf '%s/%s\n' "$HOME" "${raw_path#\~/}" ;;
+    /*) printf '%s\n' "$raw_path" ;;
+    *) printf '%s/%s\n' "$config_dir" "$raw_path" ;;
+  esac
+}
+
+resolve_workdir() {
+  local path
+  if [[ -n "$WORKDIR_INPUT" ]]; then
+    path="$(resolve_config_path_value "$WORKDIR_INPUT" "$(pwd -P)")"
+    [[ -d "$path" ]] || die "workdir is not a directory: $WORKDIR_INPUT"
+    WORKDIR_PATH="$(cd "$path" && pwd -P)"
+  else
+    WORKDIR_PATH="$(pwd -P)"
+  fi
+}
+
 resolve_workdir_config_path() {
-  WORKDIR_CONFIG_PATH="$(pwd -P)/.fugue"
+  WORKDIR_CONFIG_PATH="$WORKDIR_PATH/.fugue"
 }
 
 append_colon_paths() {
@@ -25,13 +47,7 @@ append_colon_paths() {
 
 append_config_path() {
   local target_array="$1" raw_path="$2" config_dir="$3" resolved_path
-  [[ -n "$raw_path" ]] || die "empty path in $WORKDIR_CONFIG_PATH"
-  case "$raw_path" in
-    "~") resolved_path="$HOME" ;;
-    \~/*) resolved_path="$HOME/${raw_path#\~/}" ;;
-    /*) resolved_path="$raw_path" ;;
-    *) resolved_path="$config_dir/$raw_path" ;;
-  esac
+  resolved_path="$(resolve_config_path_value "$raw_path" "$config_dir")"
 
   case "$target_array" in
     ro) ADD_DIRS_RO+=("$resolved_path") ;;
@@ -41,9 +57,9 @@ append_config_path() {
 }
 
 load_env_grants() {
-  append_colon_paths ro "${FUGUE_RO_DIRS:-}" "$(pwd -P)"
-  append_colon_paths rw "${FUGUE_ADD_DIRS:-}" "$(pwd -P)"
-  append_colon_paths profile "${FUGUE_APPEND_PROFILES:-}" "$(pwd -P)"
+  append_colon_paths ro "${FUGUE_RO_DIRS:-}" "$WORKDIR_PATH"
+  append_colon_paths rw "${FUGUE_ADD_DIRS:-}" "$WORKDIR_PATH"
+  append_colon_paths profile "${FUGUE_APPEND_PROFILES:-}" "$WORKDIR_PATH"
 }
 
 load_workdir_config() {

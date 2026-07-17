@@ -25,6 +25,11 @@ parse_flags() {
         shift
         PARSED_FLAG_COUNT=$((PARSED_FLAG_COUNT + 1))
         ;;
+      --workdir)
+        WORKDIR_INPUT="${2:?--workdir needs a path}"
+        shift 2
+        PARSED_FLAG_COUNT=$((PARSED_FLAG_COUNT + 2))
+        ;;
       --add-dir)
         ADD_DIRS_RW+=("${2:?--add-dir needs a path}")
         shift 2
