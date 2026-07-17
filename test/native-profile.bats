@@ -43,10 +43,12 @@ absfile() {
 
 @test "native profile denies common credential and daemon sockets" {
   local profile
-  profile="$(native_profile /tmp/home /tmp/work /tmp/run '' '')"
+  profile="$(native_profile '/tmp/home.with(regex)' /tmp/work /tmp/run '' '')"
 
   [[ "$profile" == *'(remote unix-socket (path-literal "/var/run/docker.sock"))'* ]]
-  [[ "$profile" == *'(remote unix-socket (path-literal "/tmp/home/.docker/run/docker.sock"))'* ]]
+  [[ "$profile" == *'(remote unix-socket (path-literal "/tmp/home.with(regex)/.docker/run/docker.sock"))'* ]]
+  [[ "$profile" == *'(remote unix-socket (path-regex #"^/tmp/home\.with\(regex\)/\.colima/[^/]+/docker\.sock$"))'* ]]
+  [[ "$profile" == *'(remote unix-socket (path-regex #"^/tmp/home\.with\(regex\)/\.local/share/containers/podman/machine/[^/]+/podman\.sock$"))'* ]]
   [[ "$profile" == *'(remote unix-socket (path-literal "/private/var/run/podman/podman.sock"))'* ]]
   [[ "$profile" == *'(remote unix-socket (path-regex #"^/private/var/run/com\.apple\.launchd\.[^/]+/Listeners$"))'* ]]
 }

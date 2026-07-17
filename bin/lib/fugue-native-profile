@@ -10,10 +10,24 @@ sb_escape() {
   printf '%s' "$value"
 }
 
+sb_regex_escape() {
+  local value="$1" i ch escaped=""
+  [[ "$value" != *[$'\001'-$'\037'$'\177']* ]] || die "invalid SBPL regex: contains control characters"
+  for ((i = 0; i < ${#value}; i++)); do
+    ch="${value:i:1}"
+    case "$ch" in
+      \\ | \" | . | ^ | '$' | '*' | + | '?' | '(' | ')' | '[' | ']' | '{' | '}' | '|') escaped+="\\$ch" ;;
+      *) escaped+="$ch" ;;
+    esac
+  done
+  printf '%s' "$escaped"
+}
+
 native_profile() {
   local real_home="$1" workdir="$2" run_home="$3" git_common_dir="$4" workdir_config_path="$5" d real
-  local real_home_sb workdir_sb run_home_sb git_common_dir_sb
+  local real_home_sb real_home_re workdir_sb run_home_sb git_common_dir_sb
   real_home_sb="$(sb_escape "$real_home")"
+  real_home_re="$(sb_regex_escape "$real_home")"
   workdir_sb="$(sb_escape "$workdir")"
   run_home_sb="$(sb_escape "$run_home")"
   cat <<SB
@@ -61,7 +75,13 @@ SB
   (literal "/private/var/run/podman/podman.sock")
   (literal "$real_home_sb/.docker/run/docker.sock")
   (literal "$real_home_sb/.rd/docker.sock")
-  (literal "$real_home_sb/.orbstack/run/docker.sock"))
+  (literal "$real_home_sb/.orbstack/run/docker.sock")
+  (regex #"^$real_home_re/\.colima/docker\.sock$")
+  (regex #"^$real_home_re/\.colima/[^/]+/docker\.sock$")
+  (regex #"^$real_home_re/\.local/share/containers/podman/machine/podman\.sock$")
+  (regex #"^$real_home_re/\.local/share/containers/podman/machine/[^/]+/podman\.sock$")
+  (regex #"^$real_home_re/\.config/containers/podman/machine/podman\.sock$")
+  (regex #"^$real_home_re/\.config/containers/podman/machine/[^/]+/podman\.sock$"))
 (deny network-outbound
   (remote unix-socket (path-literal "/var/run/docker.sock"))
   (remote unix-socket (path-literal "/private/var/run/docker.sock"))
@@ -70,6 +90,12 @@ SB
   (remote unix-socket (path-literal "$real_home_sb/.docker/run/docker.sock"))
   (remote unix-socket (path-literal "$real_home_sb/.rd/docker.sock"))
   (remote unix-socket (path-literal "$real_home_sb/.orbstack/run/docker.sock"))
+  (remote unix-socket (path-regex #"^$real_home_re/\.colima/docker\.sock$"))
+  (remote unix-socket (path-regex #"^$real_home_re/\.colima/[^/]+/docker\.sock$"))
+  (remote unix-socket (path-regex #"^$real_home_re/\.local/share/containers/podman/machine/podman\.sock$"))
+  (remote unix-socket (path-regex #"^$real_home_re/\.local/share/containers/podman/machine/[^/]+/podman\.sock$"))
+  (remote unix-socket (path-regex #"^$real_home_re/\.config/containers/podman/machine/podman\.sock$"))
+  (remote unix-socket (path-regex #"^$real_home_re/\.config/containers/podman/machine/[^/]+/podman\.sock$"))
   (remote unix-socket (path-regex #"^/private/tmp/com\.apple\.launchd\.[^/]+/Listeners$"))
   (remote unix-socket (path-regex #"^/tmp/com\.apple\.launchd\.[^/]+/Listeners$"))
   (remote unix-socket (path-regex #"^/private/var/run/com\.apple\.launchd\.[^/]+/Listeners$"))
