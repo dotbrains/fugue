@@ -28,7 +28,7 @@ append_config_path() {
   [[ -n "$raw_path" ]] || die "empty path in $WORKDIR_CONFIG_PATH"
   case "$raw_path" in
     "~") resolved_path="$HOME" ;;
-    ~/*) resolved_path="$HOME/${raw_path#~/}" ;;
+    \~/*) resolved_path="$HOME/${raw_path#\~/}" ;;
     /*) resolved_path="$raw_path" ;;
     *) resolved_path="$config_dir/$raw_path" ;;
   esac

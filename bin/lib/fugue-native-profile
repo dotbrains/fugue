@@ -42,7 +42,11 @@ SB
 SB
 
   for d in ${FUGUE_DENY_READ:-}; do
-    real="$(cd "$d" 2>/dev/null && pwd -P || echo "$d")"
+    if real="$(cd "$(expand_user_path "$d")" 2>/dev/null && pwd -P)"; then
+      :
+    else
+      real="$(expand_user_path "$d")"
+    fi
     printf '(deny file-read* (subpath "%s"))\n' "$real"
   done
 

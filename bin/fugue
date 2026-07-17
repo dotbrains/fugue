@@ -92,10 +92,23 @@ collect_credentials
 # Resolve a directory to its absolute, *physical* path. `pwd -P` matters on
 # macOS, where /var, /tmp, /etc are symlinks to /private/... and the Seatbelt
 # sandbox matches the canonical (resolved) path, not the symlinked one.
-abspath() { (cd "$1" 2>/dev/null && pwd -P) || die "no such directory: $1"; }
+expand_user_path() {
+  case "$1" in
+    "~") printf '%s\n' "$HOME" ;;
+    \~/*) printf '%s/%s\n' "$HOME" "${1#\~/}" ;;
+    *) printf '%s\n' "$1" ;;
+  esac
+}
+
+abspath() {
+  local path
+  path="$(expand_user_path "$1")"
+  (cd "$path" 2>/dev/null && pwd -P) || die "no such directory: $1"
+}
 
 absfile() {
   local path="$1" dir base
+  path="$(expand_user_path "$path")"
   [[ -f "$path" ]] || die "no such file: $path"
   [[ -r "$path" ]] || die "cannot read file: $path"
   dir="$(cd "$(dirname "$path")" 2>/dev/null && pwd -P)" || die "no such directory: $(dirname "$path")"

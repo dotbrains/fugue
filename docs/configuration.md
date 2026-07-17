@@ -90,12 +90,12 @@ add-dir=../shared-writable
 append-profile=local-deny.sb
 ```
 
-Relative paths resolve from the `.fugue` file's directory. Config-provided
-profiles use the same Seatbelt append path as `--append-profile`, and fugue emits
-a final write denial for the loaded `.fugue` file so the sandboxed process cannot
-change its own future grants. `ro-dir` and `add-dir` accept colon-separated
-paths, matching `FUGUE_RO_DIRS` and `FUGUE_ADD_DIRS`. The docker backend rejects
-trusted workdir config.
+Relative paths resolve from the `.fugue` file's directory, and `~` expands to
+the host `$HOME`. Config-provided profiles use the same Seatbelt append path as
+`--append-profile`, and fugue emits a final write denial for the loaded `.fugue`
+file so the sandboxed process cannot change its own future grants. `ro-dir` and
+`add-dir` accept colon-separated paths, matching `FUGUE_RO_DIRS` and
+`FUGUE_ADD_DIRS`. The docker backend rejects trusted workdir config.
 
 ### Native appended profiles
 

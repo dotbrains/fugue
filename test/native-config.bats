@@ -75,6 +75,26 @@ EOF
   [[ "$(cat "$EXTRA/wrote")" == "ok" ]]
 }
 
+@test "native: env grants expand tilde paths" {
+  local fake_home="$TMP/home"
+  local extra="$fake_home/extra"
+  mkdir -p "$extra"
+  cat >"$BIN/claude" <<EOF
+#!/usr/bin/env bash
+(printf ok > "$extra/wrote" 2>/dev/null && echo "WROTE_TILDE") || echo "NO_TILDE"
+EOF
+  chmod +x "$BIN/claude"
+
+  run bash -c '
+    cd "$1" || exit 99
+    HOME="$5" PATH="$2:$PATH" ANTHROPIC_API_KEY=sk-test FUGUE_ADD_DIRS="~/extra" "$3" --backend native claude
+  ' _ "$WORK" "$BIN" "$FUGUE" "$extra" "$fake_home"
+
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"WROTE_TILDE"* ]]
+  [[ "$(cat "$extra/wrote")" == "ok" ]]
+}
+
 @test "trusted workdir config is native-only" {
   run bash -c '
     cd "$1" || exit 99
