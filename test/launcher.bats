@@ -17,6 +17,7 @@ setup() {
   [ "$status" -eq 0 ]
   [[ "$output" == *"Usage:"* ]]
   [[ "$output" == *"Flags:"* ]]
+  [[ "$output" == *"agents"*"list known agents"* ]]
 }
 
 @test "no agent is a usage error" {

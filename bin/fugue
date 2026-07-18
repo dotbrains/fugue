@@ -42,6 +42,7 @@
 #   -h, --help                 this help
 #
 # Subcommands:
+#   agents                     list known agents, commands, and backends
 #   shellenv [shell]           print shell functions that route each agent through
 #                              fugue (run `command <agent>` to bypass).
 #
