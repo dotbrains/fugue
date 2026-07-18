@@ -21,11 +21,12 @@ fugue has two sandbox backends. Pick one with `--backend` (or `FUGUE_BACKEND`).
 The docker backend only runs agents baked into the image (`claude`, `codex`,
 `gemini`). The native backend runs **any** agent whose profile lists `native`,
 using the copy installed on your host — that's how the other agents are
-supported. See [architecture.md](architecture.md).
+supported.
 
 ## Agents
 
-The agent name must match a profile in [`profiles/`](../profiles).
+The agent name must match a profile in [`profiles/`](../profiles); run
+`fugue agents` to list profiles with their launch commands and backends.
 
 | Agent      | Command        | Credential(s)                              | Backends        |
 | ---------- | -------------- | ------------------------------------------ | --------------- |
@@ -46,8 +47,7 @@ The agent name must match a profile in [`profiles/`](../profiles).
 
 Native-only agents run the CLI you've installed on your host; install the agent
 yourself first. To run one under docker instead, add it to `package.json` and
-flip its profile's `BACKENDS` — see [configuration.md](configuration.md). Adding
-a brand-new agent is just a new profile ([configuration.md](configuration.md#adding-an-agent)).
+flip its profile's `BACKENDS` — see [configuration.md](configuration.md).
 
 ## Flags
 

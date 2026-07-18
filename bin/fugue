@@ -82,11 +82,7 @@ source "$FUGUE_ROOT/bin/lib/fugue-cli"
 # shellcheck source=bin/lib/fugue-workdir-config
 source "$FUGUE_ROOT/bin/lib/fugue-workdir-config"
 
-if [[ "${1:-}" == "shellenv" ]]; then
-  shift
-  emit_shellenv "${1:-posix}"
-  exit 0
-fi
+handle_subcommand "$@"
 
 parse_flags "$@"
 shift "$PARSED_FLAG_COUNT"
@@ -99,9 +95,7 @@ if [[ "$PRINT_NATIVE_PROFILE" -eq 0 ]]; then
   collect_credentials
 fi
 
-# Resolve a directory to its absolute, *physical* path. `pwd -P` matters on
-# macOS, where /var, /tmp, /etc are symlinks to /private/... and the Seatbelt
-# sandbox matches the canonical (resolved) path, not the symlinked one.
+# Resolve to the physical path Seatbelt matches on macOS.
 expand_user_path() {
   case "$1" in
     "~") printf '%s\n' "$HOME" ;;

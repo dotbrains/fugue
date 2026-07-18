@@ -8,6 +8,39 @@ known_agents() {
   done
 }
 
+list_agents() {
+  local p agent agent_cmd backends
+  printf '%-10s %-16s %s\n' "agent" "command" "backends"
+  for p in "$FUGUE_ROOT"/profiles/*.env; do
+    [[ -e "$p" ]] || continue
+    agent="${p##*/}"
+    agent="${agent%.env}"
+    (
+      # shellcheck source=/dev/null
+      source "$p"
+      agent_cmd="${AGENT_CMD:-?}"
+      backends="${BACKENDS:-docker}"
+      printf '%-10s %-16s %s\n' "$agent" "$agent_cmd" "$backends"
+    )
+  done
+}
+
+handle_subcommand() {
+  case "${1:-}" in
+    shellenv)
+      shift
+      emit_shellenv "${1:-posix}"
+      exit 0
+      ;;
+    agents)
+      shift
+      [[ $# -eq 0 ]] || die "agents does not take arguments"
+      list_agents
+      exit 0
+      ;;
+  esac
+}
+
 # Emit shell functions so `claude ...` transparently becomes `fugue claude ...`.
 # `command claude` still runs the unsandboxed agent (the shell builtin skips the
 # function), matching the documented bypass.

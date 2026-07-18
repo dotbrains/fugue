@@ -66,6 +66,20 @@ setup() {
   [[ "$output" == *"command"* ]]
 }
 
+@test "agents lists known agents with commands and backends" {
+  run "$FUGUE" agents
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"agent"*"command"*"backends"* ]]
+  [[ "$output" == *"claude"*"claude"*"docker native"* ]]
+  [[ "$output" == *"aider"*"aider"*"native"* ]]
+}
+
+@test "agents rejects extra arguments" {
+  run "$FUGUE" agents claude
+  [ "$status" -eq 2 ]
+  [[ "$output" == *"agents does not take arguments"* ]]
+}
+
 @test "shellenv fish emits fish function syntax" {
   run "$FUGUE" shellenv fish
   [ "$status" -eq 0 ]
