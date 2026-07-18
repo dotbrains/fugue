@@ -18,6 +18,7 @@ setup() {
   [[ "$output" == *"Usage:"* ]]
   [[ "$output" == *"Flags:"* ]]
   [[ "$output" == *"agents"*"list known agents"* ]]
+  [[ "$output" != *"set -euo pipefail"* ]]
 }
 
 @test "no agent is a usage error" {
